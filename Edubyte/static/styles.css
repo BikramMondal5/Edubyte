@@ -1,4 +1,4 @@
-* {
+*{
     margin: 0;
     padding: 0;
     box-sizing: border-box;
@@ -356,7 +356,7 @@ body {
     font-size: 15px;
     font-weight: 470;
     border: 1px solid #a855f7;
-    color: #a855f7;
+    /* color: #a855f7; */
     font-family: Arial, sans-serif;
     border-radius: 20px;
     padding: 7px 14px;
@@ -382,4 +382,110 @@ body {
 #recipe-queen-avatar{
     background-image: url("icons/chef-logo.jpg");
     background-size: cover;
+} 
+
+/* Chat History Styles - Add to your existing CSS file */
+
+.chat-history {
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    flex: 1;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #4b5563 #374151;
+}
+
+.user-message, .ai-message {
+    max-width: 80%;
+    padding: 12px 16px;
+    margin: 8px 0;
+    border-radius: 12px;
+    line-height: 1.4;
+    word-wrap: break-word;
+}
+
+.user-message {
+    align-self: flex-end;
+    background-color: #3B82F6;
+    color: white;
+    margin-left: auto;
+}
+
+.ai-message {
+    align-self: flex-start;
+    background-color: #2D2D2D;
+    color: #f9f9f9;
+    margin-right: auto;
+}
+
+.loading-message {
+    align-self: flex-start;
+    font-style: italic;
+    color: #CCC;
+    margin: 8px 0;
+    padding: 8px 12px;
+    background-color: #2D2D2D;
+    border-radius: 12px;
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 0.6; }
+    50% { opacity: 1; }
+    100% { opacity: 0.6; }
+}
+
+/* Animation for messages */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Markdown styling for AI responses - matches your dark theme */
+.ai-message h1, .ai-message h2, .ai-message h3 {
+    margin-top: 10px;
+    margin-bottom: 8px;
+    color: #f9f9f9;
+}
+
+.ai-message ul, .ai-message ol {
+    margin-left: 20px;
+    margin-bottom: 10px;
+}
+
+.ai-message p {
+    margin-bottom: 8px;
+}
+
+.ai-message a {
+    color: #3B82F6;
+    text-decoration: none;
+}
+
+.ai-message a:hover {
+    text-decoration: underline;
+}
+
+.ai-message code {
+    background-color: #3D3D3D;
+    padding: 2px 4px;
+    border-radius: 3px;
+    font-family: monospace;
+}
+
+.ai-message pre {
+    background-color: #3D3D3D;
+    padding: 16px;
+    border-radius: 6px;
+    overflow-x: auto;
+    margin: 10px 0;
+}
+
+/* Ensure emoji display properly */
+.ai-message img.emoji {
+    height: 1em;
+    width: 1em;
+    margin: 0 .05em 0 .1em;
+    vertical-align: -0.1em;
 }
