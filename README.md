@@ -1,2 +1,4 @@
-# Techbyte
-💡 An open-source community for the "Techbyte" team members where ideas meet code!
+# Edubyte
+
+## NOTE:
+Edubyte is currently in initial development 
