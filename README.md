@@ -24,12 +24,12 @@ Edubyte is an AI powered platform where user can interact with different generat
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/BikramMondal5/KrishiMitra.git
+git clone https://github.com/BikramMondal5/Edubyte.git
 ```
 
 2. Navigate to the project directory:
 ```bash
-cd KrishiMitra
+cd Edubyte
 ```
 
 3. Install dependencies
@@ -39,7 +39,7 @@ pip install -r requirements.txt
    
 4. Run `python app.py`
 
-5. Open your web browser and go to `http://127.0.0.1:5000/` to access the application.
+5. Open your web browser and go to `http://127.0.0.1:5000/` to interact with AI models.
 
 
 ## 🤝 Contributing
