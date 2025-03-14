@@ -1,4 +1,4 @@
-## ⚠️⚠️⚠️ Note
+## ⚠️⚠️⚠️ Important Note
 
 Edubyte is under initial development. 
 
