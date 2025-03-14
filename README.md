@@ -57,11 +57,10 @@ pip install -r requirements.txt
 5. Open your web browser and go to `http://127.0.0.1:5000/` to interact with AI models.
 
 ## ☎️ Contact
-For any queries or feedback feel free to reach me at `codesnippets45@gmail.com`. 
-
+For any queries or feedback, feel free to reach me at `codesnippets45@gmail.com`. 
 
 ## 🤝 Contributing
-Contributions are welcome! Feel free to open an issue or submit a pull request to enhance KrishiMitra.
+Contributions are welcome! Feel free to open an issue or submit a pull request to enhance Edubyte.
 
 ## 📜 License
 This project is licensed under the `MIT License`. See the [LICENSE](LICENSE) file for more details.
