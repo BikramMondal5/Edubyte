@@ -17,8 +17,8 @@ Edubyte is an AI powered platform where user can interact with different generat
 - **Frontend:** HTML, CSS, JavaScript
 - **Backend:** Python (Flask)
 - **Database:** FlaskSQL
-- **APIs:** WeatherMap API, Gemini 2.0 Flash API
-- **Deployment:** Not yet deceided
+- **Authentication:** GitHub PAT Integration 
+- **Deployment:** TBD
 
 ## ⚙️ Installation
 
