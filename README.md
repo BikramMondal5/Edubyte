@@ -1,4 +1,6 @@
-**⚠️⚠️⚠️Important:** Edubyte is under initial development. 
+## ⚠️⚠️⚠️ Note
+
+Edubyte is under initial development. 
 
 ## Edubyte - Let's see magic 🪄
 
