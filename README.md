@@ -1,6 +1,6 @@
-## 🌾🚜 KrishiMitra - Let's grow together 
+## Edubyte - Let's see magic 🪄
 
-KrishiMitra is an AI-driven agricultural platform designed to assist farmers with real-time insights, best farming practices, crop recommendations, weather forecasts, chat assistant and sustainable farming techniques.
+Edubyte is an AI powered platform where user can interact with different generative AI including advanced LLMs GPT-40, DeepSeek, Gemini 2.0 Flash, Mistral AI and many more. 
 
 ## 🚀 Features
 - 🌾 **Crop Recommendations** – AI-powered suggestions for the best crops based on soil, climate, and season.
