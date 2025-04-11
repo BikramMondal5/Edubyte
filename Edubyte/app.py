@@ -4,6 +4,7 @@ from azure.ai.inference.models import SystemMessage, UserMessage
 from azure.core.credentials import AzureKeyCredential
 import markdown
 from openai import OpenAI
+import os
 
 # Initializing the app
 app = Flask(__name__)
@@ -22,50 +23,33 @@ def chat():
         return jsonify({"error": "No message provided"}), 400
     
     # OpenAI API Configuration
-    token = "github-pat"  # Add your API key here
+    token = os.environ.get("Edubyte") # Add your API key here
     endpoint = "https://models.inference.ai.azure.com"
-    model_name = "DeepSeek-R1"
+    model_name = "gpt-4o"
     
     try:
 
-        # DeepSeek Client
-
-        client = ChatCompletionsClient(
-            endpoint=endpoint,
-            credential=AzureKeyCredential(token)
-        )
-
         #OpenAI Client
 
-        # client = OpenAI(
-        #     base_url=endpoint,
-        #     api_key=token,
-        # )
+        client = OpenAI(
+            base_url=endpoint,
+            api_key=token,
+        )
 
         #OpenAI response
         
-        # response = client.chat.completions.create(
-        #     messages=[
-        #         {"role": "system", "content": "Your name is Eubyte, developed by edubyte team, a helpful assistant. Respond in well-structured format using headings, lists, spaces after a heading or paragraph and appropriate interactive emojis."},
-        #         {"role": "user", "content": user_input}
-        #     ],
-        #     temperature=1.0,
-        #     top_p=1.0,
-        #     max_tokens=1000,
-        #     model=model_name
-        # )
-
-        # DeepSeek response
-        
-        response = client.complete(
+        response = client.chat.completions.create(
             messages=[
-                UserMessage(user_input)
+                {"role": "system", "content": "Your name is Eubyte, developed by edubyte team, a helpful assistant. Respond in well-structured format using headings, lists, spaces after a heading or paragraph and appropriate interactive emojis."},
+                {"role": "user", "content": user_input}
             ],
-            # temperature=1.0,
-            # top_p=1.0,
+            temperature=1.0,
+            top_p=1.0,
             max_tokens=1000,
             model=model_name
         )
+
+        
 
         # Extract response text
         markdown_output = response.choices[0].message.content 
