@@ -4,7 +4,7 @@ document.querySelectorAll('.tool-item').forEach(item => {
         item.style.transform = 'translateY(-2px)';
         item.style.transition = 'transform 0.2s ease';
     });
-    
+
     item.addEventListener('mouseleave', () => {
         item.style.transform = 'translateY(0)';
     });
@@ -42,19 +42,19 @@ async function sendMessage() {
             contentArea.innerHTML = '';
             contentArea.appendChild(chatHistory);
         }
-        
+
         // Add user message to chat
         addMessageToHistory(message, true);
-        
+
         // Show loading indicator
         const loadingDiv = document.createElement("div");
         loadingDiv.textContent = "Thinking...";
         loadingDiv.className = "loading-message";
         chatHistory.appendChild(loadingDiv);
-        
+
         // Clear input field
         chatInput.value = '';
-        
+
         try {
             // Fetch AI response
             const response = await fetch("/api/chat", {
@@ -64,12 +64,12 @@ async function sendMessage() {
                 },
                 body: JSON.stringify({ message: message })
             });
-            
+
             const data = await response.json();
-            
+
             // Remove loading indicator
             chatHistory.removeChild(loadingDiv);
-            
+
             if (data.error) {
                 addMessageToHistory("Error: " + data.error);
             } else {
@@ -83,16 +83,27 @@ async function sendMessage() {
         }
     }
 }
-
+function askModel(model) {
+    const message = document.getElementById('user-message').value;
+    fetch(`/api/${model}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: message })
+    })
+        .then(res => res.json())
+        .then(data => {
+            document.getElementById('response-box').innerHTML = data.response || data.error;
+        });
+}
 // Append user message to chat history
 function addMessageToHistory(message, isUser = false) {
     const messageDiv = document.createElement("div");
     messageDiv.className = isUser ? "user-message" : "ai-message";
     messageDiv.textContent = message;
-    
+
     // Add animation
     messageDiv.style.animation = "fadeIn 0.3s ease-in-out";
-    
+
     chatHistory.appendChild(messageDiv);
     chatHistory.scrollTop = chatHistory.scrollHeight;
 }
@@ -102,10 +113,10 @@ function addAIMessageToHistory(htmlContent) {
     const messageDiv = document.createElement("div");
     messageDiv.className = "ai-message";
     messageDiv.innerHTML = htmlContent;
-    
+
     // Add animation
     messageDiv.style.animation = "fadeIn 0.3s ease-in-out";
-    
+
     chatHistory.appendChild(messageDiv);
     chatHistory.scrollTop = chatHistory.scrollHeight;
 }

@@ -284,7 +284,7 @@ body {
     align-items: center;
     gap: 8px;
     margin-bottom: 8px;
-    padding: 0 8px;
+    padding: 3px 8px;
     position: relative;
     top: 3px;
 }
@@ -488,4 +488,8 @@ body {
     width: 1em;
     margin: 0 .05em 0 .1em;
     vertical-align: -0.1em;
+}
+
+#msg-container:hover{
+    border: 1px solid #a855f7;
 }
