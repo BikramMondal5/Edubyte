@@ -1,0 +1,5 @@
+flask
+azure-ai-inference
+azure-core
+markdown
+openai
