@@ -21,15 +21,15 @@ Edubyte is an AI powered platform where user can interact with different generat
 - **Deployment:** TBD
 
 ## 🧠 Available AI Models 
-- **GPT-40:** OpenAI one of the most advanced multimodal AI with superior text and code generation capabilities. 💡
+- **GPT-40:** OpenAI one of the most advanced multimodal AI with superior text and code generation capabilities.💡
   
-- **DeepSeek:** An open-weight AI model optimized for reasoning and coding tasks. 🐳
+- **DeepSeek:** An open-weight AI model optimized for reasoning and coding tasks.🐳
   
-- **Gemini 2.0 Flash:** A lightweight, fast-response LLM developed by Google. ⚡
+- **Gemini 2.0 Flash:** A lightweight, fast-response LLM developed by Google.⚡
   
-- **Edubyte:** A friendly chatAssistant for instant answer to your daily queries. 🚀
+- **Edubyte:** A friendly chatAssistant for instant answer to your daily queries.🚀
 
-- **Spoiler Alert:** More interactive AI models are coming soon! ☢️
+- **Spoiler Alert:** More interactive AI models are coming soon!☢️
 
 ## ⚙️ Installation
 
