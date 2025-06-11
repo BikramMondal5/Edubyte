@@ -356,7 +356,7 @@ body {
     font-size: 15px;
     font-weight: 470;
     border: 1px solid #a855f7;
-    /* color: #a855f7; */
+    color: #a855f7;
     font-family: Arial, sans-serif;
     border-radius: 20px;
     padding: 7px 14px;
@@ -416,6 +416,8 @@ body {
     align-items: center;
     margin: 0 10px;
     min-width: 40px;
+    position: relative;
+    top: -10px; /* Move profile 10px higher */
 }
 
 .profile-avatar {
@@ -425,7 +427,7 @@ body {
     background-color: #3D3D3D;
     background-size: cover;
     background-position: center;
-    margin-bottom: 5px;
+    margin-bottom: 3px; /* Reduced from 5px */
 }
 
 .user-avatar {
@@ -435,12 +437,16 @@ body {
     align-items: center;
     color: white;
     font-weight: bold;
+    background-image: url("icons/my-image.jfif");
+    background-size: cover;
+    background-position: center;
 }
 
 .profile-name {
     font-size: 12px;
     color: #999;
     text-align: center;
+    margin-top: -2px; /* Added negative margin to move name closer to avatar */
 }
 
 .user-message, .ai-message {
