@@ -36,7 +36,7 @@ if (!chatHistory) {
 // Set initial user information
 let userProfile = {
     name: "You",
-    initial: "U"
+    initial: ""
 };
 
 // Set assistant information - will use selected model

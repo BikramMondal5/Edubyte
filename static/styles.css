@@ -65,6 +65,8 @@ body {
     height: 32px;
     background: #3D3D3D;
     border-radius: 50%;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
 }
 
 .more-button {
@@ -428,6 +430,8 @@ body {
     background-size: cover;
     background-position: center;
     margin-bottom: 3px; /* Reduced from 5px */
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
 }
 
 .user-avatar {
