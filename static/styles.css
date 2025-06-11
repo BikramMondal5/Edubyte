@@ -275,7 +275,7 @@ body {
     background: #2D2D2D;
     border-radius: 12px;
     padding: 8px;
-    height: 130px;
+    height: 100px; /* Reduced from 130px to 100px */
     width: 100%;
 }
 
@@ -313,7 +313,7 @@ body {
     display: flex;
     gap: 8px;
     padding: 0 8px;
-    height: 90px;
+    height: 60px; /* Reduced from 90px to 60px */
     justify-content: center;
     align-items: center;
 
@@ -396,24 +396,67 @@ body {
     scrollbar-color: #4b5563 #374151;
 }
 
+.message-container {
+    display: flex;
+    margin: 10px 0;
+    width: 100%;
+}
+
+.user-container {
+    justify-content: flex-end;
+}
+
+.ai-container {
+    justify-content: flex-start;
+}
+
+.profile-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 0 10px;
+    min-width: 40px;
+}
+
+.profile-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background-color: #3D3D3D;
+    background-size: cover;
+    background-position: center;
+    margin-bottom: 5px;
+}
+
+.user-avatar {
+    background-color: #3B82F6;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    font-weight: bold;
+}
+
+.profile-name {
+    font-size: 12px;
+    color: #999;
+    text-align: center;
+}
+
 .user-message, .ai-message {
-    max-width: 80%;
+    max-width: 70%;
     padding: 12px 16px;
-    margin: 8px 0;
     border-radius: 12px;
     line-height: 1.4;
     word-wrap: break-word;
 }
 
 .user-message {
-    align-self: flex-end;
     background-color: #3B82F6;
     color: white;
-    margin-left: auto;
 }
 
 .ai-message {
-    align-self: flex-start;
     background-color: #2D2D2D;
     color: #f9f9f9;
     margin-right: auto;
@@ -492,4 +535,10 @@ body {
 
 #msg-container:hover{
     border: 1px solid #a855f7;
+}
+
+/* New */
+#options{
+    position: relative;
+    bottom: 10px;
 }

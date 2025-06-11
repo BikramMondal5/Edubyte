@@ -1,10 +1,8 @@
 from flask import Flask, render_template, request, jsonify
-from azure.ai.inference import ChatCompletionsClient
-from azure.ai.inference.models import SystemMessage, UserMessage
-from azure.core.credentials import AzureKeyCredential
 import markdown
-from openai import OpenAI
 import os
+import requests
+import json
 
 # Initializing the app
 app = Flask(__name__)
@@ -28,18 +26,14 @@ def chat():
     model_name = "gpt-4o"
     
     try:
-
-        #OpenAI Client
-
-        client = OpenAI(
-            base_url=endpoint,
-            api_key=token,
-        )
-
-        #OpenAI response
+        # Use requests library directly instead of OpenAI client
+        headers = {
+            "Content-Type": "application/json",
+            "api-key": token
+        }
         
-        response = client.chat.completions.create(
-            messages = [
+        payload = {
+            "messages": [
                 {
                     "role": "system",
                     "content": (
@@ -69,16 +63,19 @@ def chat():
                     "content": user_input
                 }
             ],
-            temperature=1.0,
-            top_p=1.0,
-            max_tokens=1000,
-            model=model_name
-        )
-
+            "temperature": 1.0,
+            "top_p": 1.0,
+            "max_tokens": 1000,
+            "model": model_name
+        }
         
-
+        # Make direct API call
+        api_url = f"{endpoint}/openai/deployments/{model_name}/chat/completions?api-version=2024-02-15-preview"
+        response = requests.post(api_url, headers=headers, json=payload)
+        response_data = response.json()
+        
         # Extract response text
-        markdown_output = response.choices[0].message.content 
+        markdown_output = response_data["choices"][0]["message"]["content"]
         html_response = markdown.markdown(markdown_output)
         
         return jsonify({"response": html_response})

@@ -33,6 +33,18 @@ if (!chatHistory) {
     contentArea.appendChild(chatHistory);
 }
 
+// Set initial user information
+let userProfile = {
+    name: "You",
+    initial: "U"
+};
+
+// Set assistant information - will use selected model
+let assistantProfile = {
+    name: "Eubyte",
+    avatar: "edubyte-avatar"
+};
+
 // Send message function
 async function sendMessage() {
     const message = chatInput.value.trim();
@@ -47,10 +59,31 @@ async function sendMessage() {
         addMessageToHistory(message, true);
 
         // Show loading indicator
+        const loadingContainer = document.createElement("div");
+        loadingContainer.className = "message-container ai-container";
+        
+        const profileInfo = document.createElement("div");
+        profileInfo.className = "profile-info";
+        
+        const profileAvatar = document.createElement("div");
+        profileAvatar.className = "profile-avatar";
+        profileAvatar.id = assistantProfile.avatar;
+        
+        const profileName = document.createElement("div");
+        profileName.className = "profile-name";
+        profileName.textContent = assistantProfile.name;
+        
+        profileInfo.appendChild(profileAvatar);
+        profileInfo.appendChild(profileName);
+        
         const loadingDiv = document.createElement("div");
         loadingDiv.textContent = "Thinking...";
         loadingDiv.className = "loading-message";
-        chatHistory.appendChild(loadingDiv);
+        
+        loadingContainer.appendChild(profileInfo);
+        loadingContainer.appendChild(loadingDiv);
+        
+        chatHistory.appendChild(loadingContainer);
 
         // Clear input field
         chatInput.value = '';
@@ -68,35 +101,58 @@ async function sendMessage() {
             const data = await response.json();
 
             // Remove loading indicator
-            chatHistory.removeChild(loadingDiv);
+            chatHistory.removeChild(loadingContainer);
 
             if (data.error) {
-                addMessageToHistory("Error: " + data.error);
+                addAIMessageToHistory("Error: " + data.error);
             } else {
                 // Add AI response to chat
                 addAIMessageToHistory(data.response);
             }
         } catch (error) {
             // Remove loading indicator and show error
-            chatHistory.removeChild(loadingDiv);
-            addMessageToHistory("Error: Unable to connect to the server. Please try again.");
+            chatHistory.removeChild(loadingContainer);
+            addAIMessageToHistory("Error: Unable to connect to the server. Please try again.");
         }
     }
 }
-function askModel(model) {
-    const message = document.getElementById('user-message').value;
-    fetch(`/api/${model}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: message })
-    })
-        .then(res => res.json())
-        .then(data => {
-            document.getElementById('response-box').innerHTML = data.response || data.error;
-        });
-}
+
 // Append user message to chat history
 function addMessageToHistory(message, isUser = false) {
+    const messageContainer = document.createElement("div");
+    messageContainer.className = isUser ? "message-container user-container" : "message-container ai-container";
+
+    // Create profile info element
+    const profileInfo = document.createElement("div");
+    profileInfo.className = "profile-info";
+
+    if (isUser) {
+        // Create user avatar with initial
+        const profileAvatar = document.createElement("div");
+        profileAvatar.className = "profile-avatar user-avatar";
+        profileAvatar.textContent = userProfile.initial;
+
+        const profileName = document.createElement("div");
+        profileName.className = "profile-name";
+        profileName.textContent = userProfile.name;
+
+        profileInfo.appendChild(profileAvatar);
+        profileInfo.appendChild(profileName);
+    } else {
+        // Create assistant avatar
+        const profileAvatar = document.createElement("div");
+        profileAvatar.className = "profile-avatar";
+        profileAvatar.id = assistantProfile.avatar;
+
+        const profileName = document.createElement("div");
+        profileName.className = "profile-name";
+        profileName.textContent = assistantProfile.name;
+
+        profileInfo.appendChild(profileAvatar);
+        profileInfo.appendChild(profileName);
+    }
+
+    // Create message element
     const messageDiv = document.createElement("div");
     messageDiv.className = isUser ? "user-message" : "ai-message";
     messageDiv.textContent = message;
@@ -104,12 +160,41 @@ function addMessageToHistory(message, isUser = false) {
     // Add animation
     messageDiv.style.animation = "fadeIn 0.3s ease-in-out";
 
-    chatHistory.appendChild(messageDiv);
+    // Append elements to container
+    if (isUser) {
+        messageContainer.appendChild(messageDiv);
+        messageContainer.appendChild(profileInfo);
+    } else {
+        messageContainer.appendChild(profileInfo);
+        messageContainer.appendChild(messageDiv);
+    }
+
+    chatHistory.appendChild(messageContainer);
     chatHistory.scrollTop = chatHistory.scrollHeight;
 }
 
 // Append AI message to chat history (with HTML support)
 function addAIMessageToHistory(htmlContent) {
+    const messageContainer = document.createElement("div");
+    messageContainer.className = "message-container ai-container";
+
+    // Create profile info element
+    const profileInfo = document.createElement("div");
+    profileInfo.className = "profile-info";
+
+    // Create assistant avatar
+    const profileAvatar = document.createElement("div");
+    profileAvatar.className = "profile-avatar";
+    profileAvatar.id = assistantProfile.avatar;
+
+    const profileName = document.createElement("div");
+    profileName.className = "profile-name";
+    profileName.textContent = assistantProfile.name;
+
+    profileInfo.appendChild(profileAvatar);
+    profileInfo.appendChild(profileName);
+
+    // Create message element
     const messageDiv = document.createElement("div");
     messageDiv.className = "ai-message";
     messageDiv.innerHTML = htmlContent;
@@ -117,7 +202,11 @@ function addAIMessageToHistory(htmlContent) {
     // Add animation
     messageDiv.style.animation = "fadeIn 0.3s ease-in-out";
 
-    chatHistory.appendChild(messageDiv);
+    // Append elements to container
+    messageContainer.appendChild(profileInfo);
+    messageContainer.appendChild(messageDiv);
+
+    chatHistory.appendChild(messageContainer);
     chatHistory.scrollTop = chatHistory.scrollHeight;
 }
 
@@ -126,7 +215,85 @@ sendButton.addEventListener("click", sendMessage);
 
 // Handle Enter key in chat input
 chatInput.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') {
+    if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault(); // Prevent default to avoid newline
         sendMessage();
     }
 });
+
+// Add functionality to control buttons in the textarea
+document.querySelectorAll('.control-button').forEach((button, index) => {
+    button.addEventListener('click', (e) => {
+        const icon = button.querySelector('i').className;
+        
+        // Handle each button based on its icon
+        if (icon.includes('paperclip')) {
+            // File attachment
+            alert("File attachment feature coming soon!");
+        } else if (icon.includes('link')) {
+            // Add link
+            const url = prompt("Enter URL:");
+            if (url) {
+                insertTextAtCursor(chatInput, `[Link](${url})`);
+            }
+        } else if (icon.includes('cog')) {
+            // Settings
+            alert("Settings panel coming soon!");
+        } else if (icon.includes('smile')) {
+            // Emoji picker
+            insertTextAtCursor(chatInput, " 😊");
+        } else if (icon.includes('microphone')) {
+            // Voice input
+            alert("Voice input feature coming soon!");
+        } else if (icon.includes('camera')) {
+            // Image upload
+            alert("Image upload feature coming soon!");
+        } else if (icon.includes('expand')) {
+            // Expand textarea
+            toggleTextareaExpand();
+        }
+    });
+});
+
+// Add functionality for bot selection
+document.querySelectorAll('.bot-item').forEach(botItem => {
+    botItem.addEventListener('click', () => {
+        // Get the bot avatar ID and name
+        const avatar = botItem.querySelector('.bot-avatar').id;
+        const name = botItem.querySelector('span').textContent;
+        
+        // Update assistant profile
+        assistantProfile.name = name;
+        assistantProfile.avatar = avatar;
+        
+        // Update the display in the chat input header
+        document.querySelector('.chat-input-header .bot-avatar').id = avatar;
+        document.querySelector('.chat-input-header .models-name').textContent = name;
+    });
+});
+
+// Helper function to insert text at cursor position in textarea
+function insertTextAtCursor(textarea, text) {
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const before = textarea.value.substring(0, start);
+    const after = textarea.value.substring(end, textarea.value.length);
+    
+    textarea.value = before + text + after;
+    textarea.selectionStart = textarea.selectionEnd = start + text.length;
+    textarea.focus();
+}
+
+// Toggle textarea expanded state
+function toggleTextareaExpand() {
+    const container = document.querySelector('.chat-input-container');
+    const footer = document.querySelector('.chat-input-footer');
+    
+    if (container.style.height === '150px') {
+        container.style.height = '100px';
+        footer.style.height = '60px';
+    } else {
+        container.style.height = '150px';
+        footer.style.height = '110px';
+    }
+}
