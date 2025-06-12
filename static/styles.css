@@ -277,7 +277,7 @@ body {
     background: #2D2D2D;
     border-radius: 12px;
     padding: 8px;
-    height: 100px; /* Reduced from 130px to 100px */
+    height: 110px; /* Increased from 100px to 110px */
     width: 100%;
 }
 
@@ -315,7 +315,7 @@ body {
     display: flex;
     gap: 8px;
     padding: 0 8px;
-    height: 60px; /* Reduced from 90px to 60px */
+    height: 70px; /* Increased from 60px to 70px */
     justify-content: center;
     align-items: center;
 

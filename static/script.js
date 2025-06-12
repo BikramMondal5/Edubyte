@@ -289,11 +289,11 @@ function toggleTextareaExpand() {
     const container = document.querySelector('.chat-input-container');
     const footer = document.querySelector('.chat-input-footer');
     
-    if (container.style.height === '150px') {
-        container.style.height = '100px';
-        footer.style.height = '60px';
+    if (container.style.height === '160px') {
+        container.style.height = '110px';
+        footer.style.height = '70px';
     } else {
-        container.style.height = '150px';
-        footer.style.height = '110px';
+        container.style.height = '160px';
+        footer.style.height = '120px';
     }
 }
