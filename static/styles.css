@@ -552,3 +552,81 @@ body {
     position: relative;
     bottom: 10px;
 }
+
+/* Image preview styling for chat interface */
+.image-preview-container {
+    margin: 8px 0;
+    width: 100%;
+    background-color: #3D3D3D;
+    border-radius: 8px;
+    padding: 8px;
+}
+
+.image-preview-wrapper {
+    position: relative;
+    display: inline-block;
+    max-width: 200px;
+}
+
+.image-preview {
+    max-width: 100%;
+    max-height: 150px;
+    border-radius: 6px;
+    display: block;
+}
+
+.remove-image-button {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: rgba(255, 0, 0, 0.7);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 22px;
+    height: 22px;
+    font-size: 16px;
+    line-height: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.remove-image-button:hover {
+    background: rgba(255, 0, 0, 0.9);
+}
+
+.image-file-name {
+    font-size: 12px;
+    color: #CCC;
+    margin-top: 4px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    max-width: 200px;
+}
+
+/* Message image styling */
+.message-image-container {
+    margin-bottom: 8px;
+}
+
+.message-image {
+    max-width: 250px;
+    max-height: 200px;
+    border-radius: 8px;
+    display: block;
+}
+
+.user-message-content {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+}
+
+.ai-message-content {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}

@@ -45,80 +45,184 @@ let assistantProfile = {
     avatar: "edubyte-avatar"
 };
 
+// Variable to store the currently selected image
+let selectedImage = null;
+
 // Send message function
 async function sendMessage() {
     const message = chatInput.value.trim();
-    if (message) {
-        // Clear welcome content if this is the first message
-        if (contentArea.querySelector('.heading')) {
-            contentArea.innerHTML = '';
-            contentArea.appendChild(chatHistory);
+    if (!message && !selectedImage) {
+        return; // Don't send empty messages without images
+    }
+
+    // Clear welcome content if this is the first message
+    if (contentArea.querySelector('.heading')) {
+        contentArea.innerHTML = '';
+        contentArea.appendChild(chatHistory);
+    }
+
+    // Add user message to chat
+    addMessageToHistory(message, true, selectedImage);
+
+    // Show loading indicator
+    const loadingContainer = document.createElement("div");
+    loadingContainer.className = "message-container ai-container";
+    
+    const profileInfo = document.createElement("div");
+    profileInfo.className = "profile-info";
+    
+    const profileAvatar = document.createElement("div");
+    profileAvatar.className = "profile-avatar";
+    profileAvatar.id = assistantProfile.avatar;
+    
+    const profileName = document.createElement("div");
+    profileName.className = "profile-name";
+    profileName.textContent = assistantProfile.name;
+    
+    profileInfo.appendChild(profileAvatar);
+    profileInfo.appendChild(profileName);
+    
+    const loadingDiv = document.createElement("div");
+    loadingDiv.textContent = "Thinking...";
+    loadingDiv.className = "loading-message";
+    
+    loadingContainer.appendChild(profileInfo);
+    loadingContainer.appendChild(loadingDiv);
+    
+    chatHistory.appendChild(loadingContainer);
+
+    // Clear input field and selected image
+    chatInput.value = '';
+
+    // Prepare the request payload
+    const payload = { message: message };
+    
+    // Add image data if an image is selected
+    if (selectedImage) {
+        payload.image = {
+            data: selectedImage.dataUrl,
+            format: selectedImage.format
+        };
+        
+        // Clear the selected image after sending
+        clearSelectedImage();
+    }
+
+    try {
+        // Fetch AI response
+        const response = await fetch("/api/chat", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(payload)
+        });
+
+        const data = await response.json();
+
+        // Remove loading indicator
+        chatHistory.removeChild(loadingContainer);
+
+        if (data.error) {
+            addAIMessageToHistory("Error: " + data.error);
+        } else {
+            // Add AI response to chat
+            addAIMessageToHistory(data.response);
         }
-
-        // Add user message to chat
-        addMessageToHistory(message, true);
-
-        // Show loading indicator
-        const loadingContainer = document.createElement("div");
-        loadingContainer.className = "message-container ai-container";
-        
-        const profileInfo = document.createElement("div");
-        profileInfo.className = "profile-info";
-        
-        const profileAvatar = document.createElement("div");
-        profileAvatar.className = "profile-avatar";
-        profileAvatar.id = assistantProfile.avatar;
-        
-        const profileName = document.createElement("div");
-        profileName.className = "profile-name";
-        profileName.textContent = assistantProfile.name;
-        
-        profileInfo.appendChild(profileAvatar);
-        profileInfo.appendChild(profileName);
-        
-        const loadingDiv = document.createElement("div");
-        loadingDiv.textContent = "Thinking...";
-        loadingDiv.className = "loading-message";
-        
-        loadingContainer.appendChild(profileInfo);
-        loadingContainer.appendChild(loadingDiv);
-        
-        chatHistory.appendChild(loadingContainer);
-
-        // Clear input field
-        chatInput.value = '';
-
-        try {
-            // Fetch AI response
-            const response = await fetch("/api/chat", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({ message: message })
-            });
-
-            const data = await response.json();
-
-            // Remove loading indicator
-            chatHistory.removeChild(loadingContainer);
-
-            if (data.error) {
-                addAIMessageToHistory("Error: " + data.error);
-            } else {
-                // Add AI response to chat
-                addAIMessageToHistory(data.response);
-            }
-        } catch (error) {
-            // Remove loading indicator and show error
-            chatHistory.removeChild(loadingContainer);
-            addAIMessageToHistory("Error: Unable to connect to the server. Please try again.");
-        }
+    } catch (error) {
+        // Remove loading indicator and show error
+        chatHistory.removeChild(loadingContainer);
+        addAIMessageToHistory("Error: Unable to connect to the server. Please try again.");
     }
 }
 
+// Function to handle image selection
+function handleImageSelect(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    
+    if (!file.type.startsWith('image/')) {
+        alert('Please select an image file.');
+        return;
+    }
+    
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const dataUrl = e.target.result;
+        const format = file.type.split('/')[1];
+        
+        // Store the selected image
+        selectedImage = {
+            dataUrl: dataUrl,
+            format: format,
+            name: file.name
+        };
+        
+        // Show image preview
+        showImagePreview(dataUrl, file.name);
+    };
+    
+    reader.readAsDataURL(file);
+}
+
+// Function to show image preview
+function showImagePreview(dataUrl, fileName) {
+    // Create or update the image preview container
+    let previewContainer = document.getElementById('image-preview-container');
+    if (!previewContainer) {
+        previewContainer = document.createElement('div');
+        previewContainer.id = 'image-preview-container';
+        previewContainer.className = 'image-preview-container';
+        document.querySelector('.chat-input-container').insertBefore(previewContainer, document.querySelector('.chat-input-footer'));
+    } else {
+        previewContainer.innerHTML = '';
+    }
+    
+    // Create the image preview
+    const previewWrapper = document.createElement('div');
+    previewWrapper.className = 'image-preview-wrapper';
+    
+    const previewImage = document.createElement('img');
+    previewImage.src = dataUrl;
+    previewImage.className = 'image-preview';
+    previewImage.alt = fileName;
+    
+    // Create remove button
+    const removeButton = document.createElement('button');
+    removeButton.className = 'remove-image-button';
+    removeButton.innerHTML = '&times;';
+    removeButton.addEventListener('click', clearSelectedImage);
+    
+    // Create file name display
+    const fileNameDisplay = document.createElement('div');
+    fileNameDisplay.className = 'image-file-name';
+    fileNameDisplay.textContent = fileName;
+    
+    // Assemble the preview
+    previewWrapper.appendChild(previewImage);
+    previewWrapper.appendChild(removeButton);
+    previewContainer.appendChild(previewWrapper);
+    previewContainer.appendChild(fileNameDisplay);
+    
+    // Adjust container height
+    document.querySelector('.chat-input-container').style.height = 'auto';
+}
+
+// Function to clear selected image
+function clearSelectedImage() {
+    selectedImage = null;
+    const previewContainer = document.getElementById('image-preview-container');
+    if (previewContainer) {
+        previewContainer.remove();
+    }
+    
+    // Reset container height
+    document.querySelector('.chat-input-container').style.height = '110px';
+    document.querySelector('.chat-input-footer').style.height = '70px';
+}
+
 // Append user message to chat history
-function addMessageToHistory(message, isUser = false) {
+function addMessageToHistory(message, isUser = false, image = null) {
     const messageContainer = document.createElement("div");
     messageContainer.className = isUser ? "message-container user-container" : "message-container ai-container";
 
@@ -152,21 +256,45 @@ function addMessageToHistory(message, isUser = false) {
         profileInfo.appendChild(profileName);
     }
 
+    // Create message content wrapper
+    const messageContentWrapper = document.createElement("div");
+    messageContentWrapper.className = isUser ? "user-message-content" : "ai-message-content";
+
     // Create message element
     const messageDiv = document.createElement("div");
     messageDiv.className = isUser ? "user-message" : "ai-message";
-    messageDiv.textContent = message;
+    
+    // Add message text if provided
+    if (message) {
+        messageDiv.textContent = message;
+    }
+    
+    // Add image if provided (for user messages)
+    if (image && isUser) {
+        const imageContainer = document.createElement("div");
+        imageContainer.className = "message-image-container";
+        
+        const messageImage = document.createElement("img");
+        messageImage.src = image.dataUrl;
+        messageImage.className = "message-image";
+        messageImage.alt = "Uploaded image";
+        
+        imageContainer.appendChild(messageImage);
+        messageContentWrapper.appendChild(imageContainer);
+    }
+    
+    messageContentWrapper.appendChild(messageDiv);
 
     // Add animation
-    messageDiv.style.animation = "fadeIn 0.3s ease-in-out";
+    messageContentWrapper.style.animation = "fadeIn 0.3s ease-in-out";
 
     // Append elements to container
     if (isUser) {
-        messageContainer.appendChild(messageDiv);
+        messageContainer.appendChild(messageContentWrapper);
         messageContainer.appendChild(profileInfo);
     } else {
         messageContainer.appendChild(profileInfo);
-        messageContainer.appendChild(messageDiv);
+        messageContainer.appendChild(messageContentWrapper);
     }
 
     chatHistory.appendChild(messageContainer);
@@ -221,15 +349,23 @@ chatInput.addEventListener('keypress', (e) => {
     }
 });
 
+// Create a hidden file input element for image uploads
+const fileInput = document.createElement('input');
+fileInput.type = 'file';
+fileInput.accept = 'image/*';
+fileInput.style.display = 'none';
+fileInput.addEventListener('change', handleImageSelect);
+document.body.appendChild(fileInput);
+
 // Add functionality to control buttons in the textarea
-document.querySelectorAll('.control-button').forEach((button, index) => {
+document.querySelectorAll('.control-button').forEach((button) => {
     button.addEventListener('click', (e) => {
         const icon = button.querySelector('i').className;
         
         // Handle each button based on its icon
         if (icon.includes('paperclip')) {
             // File attachment
-            alert("File attachment feature coming soon!");
+            fileInput.click();
         } else if (icon.includes('link')) {
             // Add link
             const url = prompt("Enter URL:");
@@ -246,8 +382,9 @@ document.querySelectorAll('.control-button').forEach((button, index) => {
             // Voice input
             alert("Voice input feature coming soon!");
         } else if (icon.includes('camera')) {
-            // Image upload
-            alert("Image upload feature coming soon!");
+            // Image upload from camera
+            fileInput.capture = 'environment';
+            fileInput.click();
         } else if (icon.includes('expand')) {
             // Expand textarea
             toggleTextareaExpand();
