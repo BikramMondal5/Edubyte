@@ -48,6 +48,11 @@ let assistantProfile = {
 // Variable to store the currently selected image
 let selectedImage = null;
 
+// Variables for audio recording
+let mediaRecorder = null;
+let audioChunks = [];
+let isRecording = false;
+
 // Send message function
 async function sendMessage() {
     const message = chatInput.value.trim();
@@ -221,6 +226,162 @@ function clearSelectedImage() {
     document.querySelector('.chat-input-footer').style.height = '70px';
 }
 
+// Start voice recording
+function startRecording() {
+    // Check if the browser supports recording
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        alert('Your browser does not support audio recording.');
+        return;
+    }
+    
+    // Request microphone access
+    navigator.mediaDevices.getUserMedia({ audio: true })
+        .then(stream => {
+            // Show recording indicator
+            showRecordingIndicator();
+            
+            // Create media recorder
+            mediaRecorder = new MediaRecorder(stream);
+            audioChunks = [];
+            
+            // Listen for data available event
+            mediaRecorder.addEventListener('dataavailable', event => {
+                audioChunks.push(event.data);
+            });
+            
+            // Listen for stop event
+            mediaRecorder.addEventListener('stop', () => {
+                // Stop all audio tracks
+                stream.getTracks().forEach(track => track.stop());
+                
+                // Process the recorded audio
+                processAudio();
+            });
+            
+            // Start recording
+            mediaRecorder.start();
+            isRecording = true;
+            
+            // Set a maximum recording time (30 seconds)
+            setTimeout(() => {
+                if (isRecording) {
+                    stopRecording();
+                }
+            }, 30000);
+        })
+        .catch(error => {
+            alert('Error accessing microphone: ' + error.message);
+        });
+}
+
+// Stop voice recording
+function stopRecording() {
+    if (mediaRecorder && isRecording) {
+        mediaRecorder.stop();
+        isRecording = false;
+        
+        // Hide recording indicator
+        hideRecordingIndicator();
+    }
+}
+
+// Process the recorded audio
+async function processAudio() {
+    if (audioChunks.length === 0) return;
+    
+    // Show processing indicator
+    const micButton = document.querySelector('.control-button i.fa-microphone, .control-button i.fa-stop');
+    if (!micButton) return;
+    
+    const buttonParent = micButton.parentNode;
+    const originalText = buttonParent.getAttribute('title') || 'Voice input';
+    buttonParent.setAttribute('title', 'Processing audio...');
+    
+    // Create audio blob with specific WAV MIME type
+    const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+    
+    // Create form data for sending to server
+    const formData = new FormData();
+    formData.append('audio', audioBlob, 'recording.wav');
+    
+    try {
+        // Send to transcription API
+        const response = await fetch('/api/transcribe', {
+            method: 'POST',
+            body: formData
+        });
+        
+        const data = await response.json();
+        
+        if (data.error) {
+            alert('Error transcribing audio: ' + data.error);
+        } else if (data.transcription) {
+            // Add the transcribed text to the chat input
+            chatInput.value = data.transcription;
+            
+            // Focus the input for editing if needed
+            chatInput.focus();
+        }
+    } catch (error) {
+        alert('Error processing audio: ' + error.message);
+    } finally {
+        // Reset microphone button
+        buttonParent.setAttribute('title', originalText);
+    }
+}
+
+// Show recording indicator
+function showRecordingIndicator() {
+    // Add a recording indicator to the mic button
+    const micButton = document.querySelector('.control-button i.fa-microphone');
+    if (micButton) {
+        micButton.classList.add('recording');
+        micButton.parentNode.setAttribute('title', 'Stop recording');
+        
+        // Replace icon with stop icon
+        micButton.classList.remove('fa-microphone');
+        micButton.classList.add('fa-stop');
+        
+        // Add pulse animation
+        micButton.style.animation = 'pulse 1.5s infinite';
+        micButton.style.color = '#ff5c74';
+    }
+    
+    // Add a recording indicator to the chat area
+    let indicator = document.getElementById('recording-indicator');
+    if (!indicator) {
+        indicator = document.createElement('div');
+        indicator.id = 'recording-indicator';
+        indicator.className = 'recording-indicator';
+        indicator.innerHTML = 'Recording... <span class="recording-dot"></span>';
+        document.querySelector('.chat-input-container').appendChild(indicator);
+    }
+}
+
+// Hide recording indicator
+function hideRecordingIndicator() {
+    // Reset the mic button
+    const micButton = document.querySelector('.control-button i.fa-stop');
+    if (micButton) {
+        micButton.classList.remove('recording');
+        micButton.parentNode.setAttribute('title', 'Voice input');
+        
+        // Restore original icon
+        micButton.classList.remove('fa-stop');
+        micButton.classList.add('fa-microphone');
+        
+        // Remove animation
+        micButton.style.animation = '';
+        micButton.style.color = '';
+    }
+    
+    // Remove the recording indicator
+    const indicator = document.getElementById('recording-indicator');
+    if (indicator) {
+        indicator.remove();
+    }
+}
+
 // Append user message to chat history
 function addMessageToHistory(message, isUser = false, image = null) {
     const messageContainer = document.createElement("div");
@@ -360,32 +521,36 @@ document.body.appendChild(fileInput);
 // Add functionality to control buttons in the textarea
 document.querySelectorAll('.control-button').forEach((button) => {
     button.addEventListener('click', (e) => {
-        const icon = button.querySelector('i').className;
+        const icon = button.querySelector('i');
         
-        // Handle each button based on its icon
-        if (icon.includes('paperclip')) {
+        // Handle each button based on its icon class
+        if (icon.className.includes('fa-paperclip')) {
             // File attachment
             fileInput.click();
-        } else if (icon.includes('link')) {
+        } else if (icon.className.includes('fa-link')) {
             // Add link
             const url = prompt("Enter URL:");
             if (url) {
                 insertTextAtCursor(chatInput, `[Link](${url})`);
             }
-        } else if (icon.includes('cog')) {
+        } else if (icon.className.includes('fa-cog')) {
             // Settings
             alert("Settings panel coming soon!");
-        } else if (icon.includes('smile')) {
+        } else if (icon.className.includes('fa-smile')) {
             // Emoji picker
             insertTextAtCursor(chatInput, " 😊");
-        } else if (icon.includes('microphone')) {
-            // Voice input
-            alert("Voice input feature coming soon!");
-        } else if (icon.includes('camera')) {
+        } else if (icon.className.includes('fa-microphone') || icon.className.includes('fa-stop')) {
+            // Voice input toggle
+            if (isRecording) {
+                stopRecording();
+            } else {
+                startRecording();
+            }
+        } else if (icon.className.includes('fa-camera')) {
             // Image upload from camera
             fileInput.capture = 'environment';
             fileInput.click();
-        } else if (icon.includes('expand')) {
+        } else if (icon.className.includes('fa-expand')) {
             // Expand textarea
             toggleTextareaExpand();
         }

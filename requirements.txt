@@ -3,3 +3,7 @@ azure-ai-inference
 azure-core
 markdown
 openai
+SpeechRecognition
+pyaudio
+pydub
+ffmpeg-python
