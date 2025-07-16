@@ -76,85 +76,165 @@
 
     <!-- Main Content -->
     <div class="main-content">
-        <div id = "content-area" class="content-area">
-            <div class="heading">
-                <h1>Welcome to</h1>
-                <div class="edubyte">Edubyte!</div>
-            </div>
-
-            <!-- Tools Section -->
-            <div class="section">
-                <div class="section-header">
-                    <h2 class="section-title">Tools</h2>
-                    <a href="#" class="more-link">More</a>
+        <div id="content-area" class="content-area">
+            <div class="main-grid-layout">
+                <div class="welcome-header">
+                    <h1>Welcome to <span class="edubyte-text">Edubyte!</span></h1>
+                    <p class="welcome-subtitle">Your AI-powered educational assistant</p>
                 </div>
-                <div class="tools-grid">
-                    <div class="tool-item">
-                        <span class="tool-icon">✍️</span>
-                        <span class="tool-name">Write</span>
-                    </div>
-                    <div class="tool-item">
-                        <span class="tool-icon">📝</span>
-                        <span class="tool-name">Grammar</span>
-                    </div>
-                    <div class="tool-item">
-                        <span class="tool-icon">🌐</span>
-                        <span class="tool-name">Translate</span>
-                    </div>
-                    <div class="tool-item">
-                        <span class="tool-icon">🔍</span>
-                        <span class="tool-name">Detect</span>
-                    </div>
-                    <div class="tool-item">
-                        <span class="tool-icon">📄</span>
-                        <span class="tool-name">Summarize</span>
-                    </div>
-                    <div class="tool-item">
-                        <span class="tool-icon">🗺️</span>
-                        <span class="tool-name">Mind Map</span>
-                    </div>
-                    <div class="tool-item">
-                        <span class="tool-icon">🔎</span>
-                        <span class="tool-name">AI Search</span>
-                    </div>
-                    <div class="tool-item">
-                        <span class="tool-icon">🤖</span>
-                        <span class="tool-name">Bots</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Image Section -->
-            <div class="section">
-                <div class="section-header">
-                    <h2 class="section-title">Advance AI models</h2>
-                    <a href="#" class="more-link">More</a>
-                </div>
-                <div class="image-cards">
-                    <div class="image-card">
-                        <div class="image-card-header">
-                            <div>
-                                <h3 class="card-title">Content Writer</h3>
-                                <p class="card-subtitle">Supports 7+ professional models</p>
-                            </div>
-                            <div class="model-badges">
-                                <div class="model-badge">Gemini 2.0</div>
-                                <div class="model-badge">Deepseek R1</div>
-                                <div class="model-badge">GPT-40</div>
-                            </div>
+                
+                <!-- Quick Actions Grid -->
+                <div class="grid-container">
+                    <div class="grid-item">
+                        <div class="grid-icon">
+                            <i class="fas fa-code"></i>
+                        </div>
+                        <div class="grid-text">
+                            <h3>Code Generation</h3>
+                            <p>Generate code snippets in multiple languages</p>
                         </div>
                     </div>
-                    <div class="image-card">
-                        <div class="image-card-header">
-                            <div>
-                                <h3 class="card-title">Productive tools</h3>
-                                <p class="card-subtitle">Instant answer, Summary, Cooking recipe and more</p>
+                    <div class="grid-item">
+                        <div class="grid-icon">
+                            <i class="fas fa-graduation-cap"></i>
+                        </div>
+                        <div class="grid-text">
+                            <h3>Learning Path</h3>
+                            <p>Custom learning paths for different skills</p>
+                        </div>
+                    </div>
+                    <div class="grid-item">
+                        <div class="grid-icon">
+                            <i class="fas fa-question-circle"></i>
+                        </div>
+                        <div class="grid-text">
+                            <h3>Quick Q&A</h3>
+                            <p>Get answers to your questions instantly</p>
+                        </div>
+                    </div>
+                    <div class="grid-item">
+                        <div class="grid-icon">
+                            <i class="fas fa-book"></i>
+                        </div>
+                        <div class="grid-text">
+                            <h3>Study Notes</h3>
+                            <p>Generate study materials from any topic</p>
+                        </div>
+                    </div>
+                    <div class="grid-item">
+                        <div class="grid-icon">
+                            <i class="fas fa-project-diagram"></i>
+                        </div>
+                        <div class="grid-text">
+                            <h3>Project Ideas</h3>
+                            <p>Get custom project ideas based on skills</p>
+                        </div>
+                    </div>
+                    <div class="grid-item">
+                        <div class="grid-icon">
+                            <i class="fas fa-laptop-code"></i>
+                        </div>
+                        <div class="grid-text">
+                            <h3>Code Review</h3>
+                            <p>Get feedback on your code implementations</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Models Section -->
+                <div class="models-section">
+                    <h2 class="section-title">AI Models</h2>
+                    
+                    <div class="models-grid">
+                        <div class="model-card">
+                            <div class="model-header">
+                                <div class="model-avatar" id="gpt4-model"></div>
+                                <div class="model-info">
+                                    <h3>GPT-4o</h3>
+                                    <span class="model-badge">OpenAI</span>
+                                </div>
                             </div>
-                            <div class="model-badges">
-                                <div class="model-badge">Edubyte</div>
-                                <div class="model-badge">Recipe Queen</div>
-                                <div class="model-badge">YouTube-summarizer</div>
-                           </div>
+                            <p class="model-description">Advanced multimodal capabilities for text and vision tasks</p>
+                            <div class="model-stats">
+                                <div class="stat-item">
+                                    <span class="stat-value">175B</span>
+                                    <span class="stat-label">Parameters</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-value">2023</span>
+                                    <span class="stat-label">Knowledge</span>
+                                </div>
+                            </div>
+                            <button class="use-model-btn">Use Model</button>
+                        </div>
+                        
+                        <div class="model-card">
+                            <div class="model-header">
+                                <div class="model-avatar" id="deepseek-model"></div>
+                                <div class="model-info">
+                                    <h3>DeepSeek R1</h3>
+                                    <span class="model-badge">DeepSeek</span>
+                                </div>
+                            </div>
+                            <p class="model-description">Specialized for code generation and technical reasoning</p>
+                            <div class="model-stats">
+                                <div class="stat-item">
+                                    <span class="stat-value">110B</span>
+                                    <span class="stat-label">Parameters</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-value">2024</span>
+                                    <span class="stat-label">Knowledge</span>
+                                </div>
+                            </div>
+                            <button class="use-model-btn">Use Model</button>
+                        </div>
+                        
+                        <div class="model-card">
+                            <div class="model-header">
+                                <div class="model-avatar" id="gemini-model"></div>
+                                <div class="model-info">
+                                    <h3>Gemini 2.0</h3>
+                                    <span class="model-badge">Google</span>
+                                </div>
+                            </div>
+                            <p class="model-description">Fast response times with multimodal capabilities</p>
+                            <div class="model-stats">
+                                <div class="stat-item">
+                                    <span class="stat-value">140B</span>
+                                    <span class="stat-label">Parameters</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-value">2024</span>
+                                    <span class="stat-label">Knowledge</span>
+                                </div>
+                            </div>
+                            <button class="use-model-btn">Use Model</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Featured Tools -->
+                <div class="featured-tools">
+                    <h2 class="section-title">Featured Tools</h2>
+                    
+                    <div class="tools-row">
+                        <div class="tool-card">
+                            <div class="tool-icon"><i class="fas fa-brain"></i></div>
+                            <h3>AI Tutor</h3>
+                            <p>Get personalized learning sessions with advanced AI tutoring</p>
+                        </div>
+                        
+                        <div class="tool-card">
+                            <div class="tool-icon"><i class="fas fa-file-code"></i></div>
+                            <h3>Code Generator</h3>
+                            <p>Generate production-ready code in multiple languages</p>
+                        </div>
+                        
+                        <div class="tool-card">
+                            <div class="tool-icon"><i class="fas fa-robot"></i></div>
+                            <h3>Custom Bots</h3>
+                            <p>Create and customize your own AI assistants</p>
                         </div>
                     </div>
                 </div>
@@ -163,7 +243,6 @@
 
         <!-- Bottom Bar -->
         <div class="bottom-bar">
-
             <div id="msg-container" class="chat-input-container">
                 <div class="chat-input-header">
                     <div class="bot-avatar" id="edubyte-avatar"></div>
@@ -193,11 +272,10 @@
                         <button class="control-button">
                             <i class="fas fa-expand"></i>
                         </button>
-                        <button id = "send-button" class="send-button">
+                        <button id="send-button" class="send-button">
                             <i class="fas fa-paper-plane"></i>
                         </button>
                     </div>
-                    
                 </div>
             </div>
         </div>

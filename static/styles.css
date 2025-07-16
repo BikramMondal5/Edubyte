@@ -6,7 +6,7 @@
 
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-    background-color: #1C1C1C;
+    background-color: #0f0f0f;
     color: white;
     height: 100vh;
     display: flex;
@@ -134,112 +134,265 @@ body {
     scrollbar-color: #4b5563 #374151;
 }
 
-.edubyte {
- font-size: 2rem;
- font-weight: bold;
- background: linear-gradient(90deg, #ff7eb3, #ff758c, #ff5c74, #a05195);
- -webkit-background-clip: text;
- -webkit-text-fill-color: transparent;
- margin-left: 0.5rem;
-}
-
-.heading {
- display: flex;
- flex-direction: row;
- position: relative;
- bottom: 10px;
-}
-
-.section {
-    margin-bottom: 32px;
-}
-
-.section-header {
+/* New Main Grid Layout */
+.main-grid-layout {
     display: flex;
-    justify-content: space-between;
+    flex-direction: column;
+    gap: 32px;
+}
+
+/* Welcome Header Styles */
+.welcome-header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.welcome-header h1 {
+    font-size: 2.5rem;
+    margin-bottom: 8px;
+}
+
+.welcome-subtitle {
+    color: #a0a0a0;
+    font-size: 1.1rem;
+}
+
+.edubyte-text {
+    background: linear-gradient(90deg, #ff7eb3, #ff758c, #ff5c74, #a05195);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: 700;
+}
+
+/* Grid Container Styles */
+.grid-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-gap: 20px;
+}
+
+.grid-item {
+    background-color: #1a1a1a;
+    border-radius: 12px;
+    padding: 20px;
+    display: flex;
+    gap: 16px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: 1px solid #2d2d2d;
+}
+
+.grid-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+    border-color: #a855f7;
+}
+
+.grid-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #3a0647, #8b5cf6);
+    display: flex;
+    justify-content: center;
     align-items: center;
-    margin-bottom: 16px;
+}
+
+.grid-icon i {
+    font-size: 22px;
+    color: white;
+}
+
+.grid-text {
+    flex: 1;
+}
+
+.grid-text h3 {
+    margin-bottom: 8px;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.grid-text p {
+    color: #a0a0a0;
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+/* Models Section */
+.models-section {
+    margin-top: 20px;
 }
 
 .section-title {
-    font-size: 18px;
-    font-weight: 500;
+    font-size: 24px;
+    margin-bottom: 20px;
+    font-weight: 600;
 }
 
-.more-link {
-    color: #3B82F6;
-    text-decoration: none;
-}
-
-.tools-grid {
+.models-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 16px;
+    grid-template-columns: repeat(3, 1fr);
+    grid-gap: 20px;
 }
 
-.tool-item {
-    background: #2D2D2D;
-    padding: 16px;
+.model-card {
+    background-color: #1a1a1a;
     border-radius: 12px;
+    padding: 20px;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    gap: 8px;
-    cursor: pointer;
+    border: 1px solid #2d2d2d;
+    transition: transform 0.3s ease, border-color 0.3s ease;
 }
 
-.tool-item:hover {
-    background: #3D3D3D;
+.model-card:hover {
+    transform: translateY(-5px);
+    border-color: #a855f7;
 }
 
-.tool-icon {
-    font-size: 24px;
-}
-
-.tool-name {
-    font-size: 14px;
-}
-
-.image-cards {
-    display: grid;
-    gap: 16px;
-}
-
-.image-card {
-    background: #2D2D2D;
-    padding: 16px;
-    border-radius: 12px;
-}
-
-.image-card-header {
+.model-header {
     display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
+    align-items: center;
+    margin-bottom: 15px;
+    gap: 12px;
 }
 
-.card-title {
-    font-weight: 500;
+.model-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-size: cover;
+    background-position: center;
+}
+
+#gpt4-model {
+    background-image: url("icons/openai-logo.jpg");
+}
+
+#deepseek-model {
+    background-image: url("icons/deepseek-logo-icon.png");
+}
+
+#gemini-model {
+    background-image: url("icons/Gemini.png");
+}
+
+.model-info {
+    flex: 1;
+}
+
+.model-info h3 {
+    font-size: 18px;
+    font-weight: 600;
     margin-bottom: 4px;
 }
 
-.card-subtitle {
-    font-size: 14px;
-    color: #666;
-}
-
-.model-badges {
-    display: flex;
-    gap: 8px;
-}
-
 .model-badge {
-    padding: 5px 3px 5px 3px; 
-    background: #3D3D3D;
-    border-radius: 6px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
     font-size: 12px;
+    padding: 3px 8px;
+    background-color: #2d2d2d;
+    border-radius: 30px;
+    color: #a0a0a0;
+}
+
+.model-description {
+    color: #a0a0a0;
+    margin-bottom: 15px;
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+.model-stats {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.stat-item {
+    display: flex;
+    flex-direction: column;
+}
+
+.stat-value {
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.stat-label {
+    font-size: 12px;
+    color: #a0a0a0;
+}
+
+.use-model-btn {
+    background: linear-gradient(90deg, #7e22ce, #a855f7);
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 8px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: opacity 0.3s ease;
+    margin-top: auto;
+}
+
+.use-model-btn:hover {
+    opacity: 0.9;
+}
+
+/* Featured Tools Styles */
+.featured-tools {
+    margin-top: 20px;
+}
+
+.tools-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-gap: 20px;
+}
+
+.tool-card {
+    background-color: #1a1a1a;
+    border-radius: 12px;
+    padding: 25px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    border: 1px solid #2d2d2d;
+    transition: transform 0.3s ease, border-color 0.3s ease;
+}
+
+.tool-card:hover {
+    transform: translateY(-5px);
+    border-color: #a855f7;
+}
+
+.tool-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #3a0647, #8b5cf6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.tool-icon i {
+    font-size: 26px;
+    color: white;
+}
+
+.tool-card h3 {
+    margin-bottom: 8px;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.tool-card p {
+    color: #a0a0a0;
+    font-size: 14px;
+    line-height: 1.4;
 }
 
 /* Bottom Bar Styles */
@@ -277,7 +430,7 @@ body {
     background: #2D2D2D;
     border-radius: 12px;
     padding: 8px;
-    height: 110px; /* Increased from 100px to 110px */
+    height: 110px;
     width: 100%;
 }
 
@@ -315,10 +468,9 @@ body {
     display: flex;
     gap: 8px;
     padding: 0 8px;
-    height: 70px; /* Increased from 60px to 70px */
+    height: 70px;
     justify-content: center;
     align-items: center;
-
 }
 
 .chat-input {
@@ -387,7 +539,6 @@ body {
 } 
 
 /* Chat History Styles - Add to your existing CSS file */
-
 .chat-history {
     display: flex;
     flex-direction: column;
@@ -495,7 +646,7 @@ body {
     to { opacity: 1; transform: translateY(0); }
 }
 
-/* Markdown styling for AI responses - matches your dark theme */
+/* Markdown styling for AI responses */
 .ai-message h1, .ai-message h2, .ai-message h3 {
     margin-top: 10px;
     margin-bottom: 8px;

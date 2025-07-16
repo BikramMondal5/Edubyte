@@ -1,5 +1,5 @@
 // Add hover effect to tool items
-document.querySelectorAll('.tool-item').forEach(item => {
+document.querySelectorAll('.tool-item, .grid-item, .model-card, .tool-card').forEach(item => {
     item.addEventListener('mouseenter', () => {
         item.style.transform = 'translateY(-2px)';
         item.style.transition = 'transform 0.2s ease';
@@ -10,8 +10,8 @@ document.querySelectorAll('.tool-item').forEach(item => {
     });
 });
 
-// Add click effect to action buttons
-document.querySelectorAll('.action-button').forEach(button => {
+// Add click effect to action buttons and other interactive elements
+document.querySelectorAll('.action-button, .use-model-btn, .control-button').forEach(button => {
     button.addEventListener('click', () => {
         button.style.transform = 'scale(0.95)';
         setTimeout(() => {
@@ -30,7 +30,6 @@ let chatHistory = document.querySelector(".chat-history");
 if (!chatHistory) {
     chatHistory = document.createElement("div");
     chatHistory.className = "chat-history";
-    contentArea.appendChild(chatHistory);
 }
 
 // Set initial user information
@@ -53,6 +52,93 @@ let mediaRecorder = null;
 let audioChunks = [];
 let isRecording = false;
 
+// Initialize UI interaction handlers
+function initializeUIHandlers() {
+    // Grid items click handling
+    document.querySelectorAll('.grid-item').forEach(item => {
+        item.addEventListener('click', () => {
+            const title = item.querySelector('h3').textContent;
+            startChatWithPrompt(title);
+        });
+    });
+
+    // Model card "Use Model" button handling
+    document.querySelectorAll('.use-model-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const modelCard = btn.closest('.model-card');
+            const modelName = modelCard.querySelector('h3').textContent;
+            const modelAvatar = modelCard.querySelector('.model-avatar').id;
+            
+            // Update the active model
+            switchActiveModel(modelName, modelAvatar);
+            
+            // Start chat with this model
+            startChatWithPrompt(`Hi, I'd like to use ${modelName} for my queries`);
+        });
+    });
+    
+    // Tool card handling
+    document.querySelectorAll('.tool-card').forEach(card => {
+        card.addEventListener('click', () => {
+            const toolName = card.querySelector('h3').textContent;
+            startChatWithPrompt(`I want to use the ${toolName} tool`);
+        });
+    });
+
+    // Bot selection in the sidebar
+    document.querySelectorAll('.bot-item').forEach(botItem => {
+        botItem.addEventListener('click', () => {
+            const name = botItem.querySelector('span').textContent;
+            const avatar = botItem.querySelector('.bot-avatar').id;
+            
+            // Update the active model
+            switchActiveModel(name, avatar);
+            
+            // Start a new chat if we're on the main page
+            if (document.querySelector('.main-grid-layout')) {
+                startChatWithPrompt(`Hi, I'd like to chat with ${name}`);
+            }
+        });
+    });
+    
+    // Recent chat items click handling
+    document.querySelectorAll('.recent-chat-item').forEach(item => {
+        item.addEventListener('click', () => {
+            const topic = item.querySelector('span').textContent;
+            startChatWithPrompt(topic);
+        });
+    });
+}
+
+// Switch the active model/assistant
+function switchActiveModel(name, avatarId) {
+    // Update assistant profile
+    assistantProfile.name = name;
+    assistantProfile.avatar = avatarId;
+    
+    // Update the display in the chat input header
+    document.querySelector('.chat-input-header .bot-avatar').id = avatarId;
+    document.querySelector('.chat-input-header .models-name').textContent = name;
+}
+
+// Start a chat with a specific prompt
+function startChatWithPrompt(prompt) {
+    // Clear the main content area
+    contentArea.innerHTML = '';
+    
+    // Add the chat history if it's not already there
+    if (!document.querySelector('.chat-history')) {
+        contentArea.appendChild(chatHistory);
+    }
+    
+    // Set the input value to the prompt
+    chatInput.value = prompt;
+    
+    // Send the message
+    sendMessage();
+}
+
 // Send message function
 async function sendMessage() {
     const message = chatInput.value.trim();
@@ -60,8 +146,9 @@ async function sendMessage() {
         return; // Don't send empty messages without images
     }
 
-    // Clear welcome content if this is the first message
-    if (contentArea.querySelector('.heading')) {
+    // If we're still on the main page with grid layout, clear it
+    const mainGrid = contentArea.querySelector('.main-grid-layout');
+    if (mainGrid) {
         contentArea.innerHTML = '';
         contentArea.appendChild(chatHistory);
     }
@@ -557,23 +644,6 @@ document.querySelectorAll('.control-button').forEach((button) => {
     });
 });
 
-// Add functionality for bot selection
-document.querySelectorAll('.bot-item').forEach(botItem => {
-    botItem.addEventListener('click', () => {
-        // Get the bot avatar ID and name
-        const avatar = botItem.querySelector('.bot-avatar').id;
-        const name = botItem.querySelector('span').textContent;
-        
-        // Update assistant profile
-        assistantProfile.name = name;
-        assistantProfile.avatar = avatar;
-        
-        // Update the display in the chat input header
-        document.querySelector('.chat-input-header .bot-avatar').id = avatar;
-        document.querySelector('.chat-input-header .models-name').textContent = name;
-    });
-});
-
 // Helper function to insert text at cursor position in textarea
 function insertTextAtCursor(textarea, text) {
     const start = textarea.selectionStart;
@@ -599,3 +669,8 @@ function toggleTextareaExpand() {
         footer.style.height = '120px';
     }
 }
+
+// Initialize UI when the DOM is fully loaded
+document.addEventListener('DOMContentLoaded', () => {
+    initializeUIHandlers();
+});
