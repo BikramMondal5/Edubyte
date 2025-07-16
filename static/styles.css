@@ -36,11 +36,17 @@ body {
 .search-input {
     width: 100%;
     padding: 8px 8px 8px 32px;
-    background: #2D2D2D;
+    background: #1a1a1a;
     border: 1px solid #a855f7;
     border-radius: 6px;
     color: white;
     font-size: 14px;
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: #c084fc;
+    box-shadow: 0 0 0 2px rgba(168, 85, 247, 0.25);
 }
 
 .bots-list {
@@ -124,6 +130,10 @@ body {
     flex: 1;
     display: flex;
     flex-direction: column;
+    background-color: #0f0f0f;
+    background-image: radial-gradient(circle, rgba(37, 38, 43, 0.7) 1px, transparent 1px);
+    background-size: 20px 20px;
+    background-position: 0 0;
 }
 
 .content-area {
@@ -398,8 +408,7 @@ body {
 
 /* Bottom Bar Styles */
 .bottom-bar {
-    border-top: 1px solid #2D2D2D;
-    padding: 16px;
+    padding: 7px;
 }
 
 .action-buttons {
@@ -428,11 +437,13 @@ body {
 }
 
 .chat-input-container {
-    background: #2D2D2D;
+    background: #1a1a1a;
     border-radius: 12px;
     padding: 8px;
     height: 110px;
     width: 100%;
+    border: 1px solid #2D2D2D;
+    transition: border-color 0.3s ease;
 }
 
 .chat-input-header {
@@ -482,10 +493,16 @@ body {
     height: 30px; 
     font-size: 17px;
     font-family: Georgia, 'Times New Roman', Times, serif;
+    caret-color: #a855f7; /* Purple cursor color */
 }
 
 .chat-input:focus {
     outline: none;
+    border: none;
+}
+
+.chat-input::placeholder {
+    color: #666;
 }
 
 .send-button {
