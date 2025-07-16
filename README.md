@@ -1,5 +1,6 @@
-## 🤖🪄 Edubyte - Let's see magic!
+## 🤖🪄 Edubyte - "Interact. Innovate. Inspire with AI"
 
+![Edubyte Interface](./static/icons/screenshot.jpg)
 Edubyte is an AI powered platform where user can interact with different generative AI including advanced LLMs GPT-40, DeepSeek, Gemini 2.0 Flash, Mistral AI and many more. 
 
 ## 🌟 Features 
