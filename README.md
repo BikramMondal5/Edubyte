@@ -59,5 +59,7 @@ For any queries or feedback, feel free to reach me at `codesnippets45@gmail.com`
 ## 🤝 Contributing
 Contributions are welcome! Feel free to open an issue or submit a pull request to enhance Edubyte.
 
+**Present Contributors (In alphabetical order)**: Ashmita Ray, Ashutosh Singh, Modhura Banerjee, Upolobdhi Karmakar
+
 ## 📜 License
 This project is licensed under the `MIT License`. See the [LICENSE](LICENSE) file for more details.
