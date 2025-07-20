@@ -59,7 +59,7 @@ For any queries or feedback, feel free to reach me at `codesnippets45@gmail.com`
 ## 🤝 Contributing
 Contributions are welcome! Feel free to open an issue or submit a pull request to enhance Edubyte.
 
-**Present Contributors (In alphabetical order)**: Ashmita Ray, Ashutosh Singh, Modhura Banerjee, Upolobdhi Karmakar
+**Present Contributors (In alphabetical order)**: 1. `Ashmita Ray, Technical Documentation Designer`, 2. `Ashutosh Singh, Ideate`, 3. `Bikram Mondal, Ideate, Speaker & Development`4. `Modhura Banerjee, Technical Documentation Designer`, 4. `Upolobdhi Karmakar, Ideate & Speaker`.
 
 ## 📜 License
 This project is licensed under the `MIT License`. See the [LICENSE](LICENSE) file for more details.
