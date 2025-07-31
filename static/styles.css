@@ -73,6 +73,30 @@ body {
     border-radius: 50%;
     aspect-ratio: 1 / 1;
     object-fit: cover;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+/* Individual bot avatar backgrounds for sidebar */
+#Articuno-avatar {
+    background-image: url('icons/articuno.png');
+}
+
+#gpt-4o-avatar {
+    background-image: url('icons/openai-logo.jpg');
+}
+
+#DeepSeek-avatar {
+    background-image: url('icons/deepseek-logo-icon.png');
+}
+
+#gemini-avatar {
+    background-image: url('icons/Gemini.png');
+}
+
+#recipe-queen-avatar {
+    background-image: url('icons/chef-logo.jpg');
 }
 
 .more-button {
@@ -902,9 +926,11 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center;
     gap: 1.5rem;
     max-width: 600px;
     margin: 0 auto;
+    text-align: center;
 }
 
 .showcase-avatar {
@@ -918,6 +944,7 @@ body {
     border: 3px solid #a855f7;
     box-shadow: 0 8px 32px rgba(168, 85, 247, 0.3);
     transition: all 0.3s ease;
+    margin: 0 auto;
 }
 
 .showcase-avatar:hover {
@@ -929,20 +956,24 @@ body {
     font-size: 2.5rem;
     font-weight: 700;
     color: white;
-    margin: 0;
+    margin: 0 auto;
     line-height: 1.2;
+    text-align: center;
     background: linear-gradient(135deg, #a855f7, #c084fc);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+    width: 100%;
 }
 
 .showcase-description {
     font-size: 1.125rem;
     color: #a0a0a0;
-    margin: 0;
+    margin: 0 auto;
     line-height: 1.6;
     max-width: 500px;
+    text-align: center;
+    width: 100%;
 }
 
 .start-chat-btn {
@@ -968,13 +999,13 @@ body {
     transform: translateY(0);
 }
 
-/* Bot avatar specific backgrounds */
+/* Bot avatar specific backgrounds for showcase */
 #showcase-avatar.Articuno-avatar {
-    background-image: url('icons/articuno-logo-icon.png');
+    background-image: url('icons/articuno.png');
 }
 
 #showcase-avatar.gpt-4o-avatar {
-    background-image: url('icons/gpt-4o-logo-icon.png');
+    background-image: url('icons/openai-logo.jpg');
 }
 
 #showcase-avatar.DeepSeek-avatar {
@@ -982,11 +1013,11 @@ body {
 }
 
 #showcase-avatar.gemini-avatar {
-    background-image: url('icons/gemini-logo-icon.png');
+    background-image: url('icons/Gemini.png');
 }
 
 #showcase-avatar.recipe-queen-avatar {
-    background-image: url('icons/recipe-queen-logo-icon.png');
+    background-image: url('icons/chef-logo.jpg');
 }
 
 /* Active bot item styling */
