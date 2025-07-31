@@ -24,6 +24,13 @@ document.querySelectorAll('.action-button, .use-model-btn, .control-button').for
 const chatInput = document.querySelector('.chat-input');
 const sendButton = document.getElementById("send-button");
 const contentArea = document.getElementById("content-area");
+const mainGrid = document.querySelector(".main-grid-layout");
+const chatbotInterface = document.getElementById('chatbot-interface');
+const chatbotHeader = document.querySelector('.chatbot-header');
+const chatbotAvatar = document.querySelector('.chatbot-avatar');
+const chatbotName = document.querySelector('.chatbot-info h2');
+const chatbotDescription = document.querySelector('.chatbot-info p');
+const chatbotChatHistory = document.getElementById('chatbot-chat-history');
 
 // Create chat history container if it doesn't exist
 let chatHistory = document.querySelector(".chat-history");
@@ -42,6 +49,85 @@ let userProfile = {
 let assistantProfile = {
     name: "Eubyte",
     avatar: "edubyte-avatar"
+};
+
+// Bot descriptions (you can expand this with more details)
+const botDescriptions = {
+    "Articuno.AI": {
+        name: "Articuno.AI",
+        description: "Your AI-powered educational assistant for learning and development.",
+        avatar: "Articuno-avatar"
+    },
+    "GPT-4o": {
+        name: "GPT-4o",
+        description: "Advanced multimodal capabilities for text and vision tasks.",
+        avatar: "gpt-4o-avatar"
+    },
+    "DeepSeek R1": {
+        name: "DeepSeek R1",
+        description: "Specialized for code generation and technical reasoning.",
+        avatar: "DeepSeek-avatar"
+    },
+    "Gemini 2.0 Flash": {
+        name: "Gemini 2.0 Flash",
+        description: "Fast response times with multimodal capabilities.",
+        avatar: "gemini-avatar"
+    },
+    "Recipe Queen": {
+        name: "Recipe Queen",
+        description: "Your culinary assistant for recipes, cooking tips, and meal planning.",
+        avatar: "recipe-queen-avatar"
+    },
+    "Code Copilot": {
+        name: "Code Copilot",
+        description: "Your AI pair programmer for faster, smarter coding.",
+        avatar: "code-copilot-avatar"
+    },
+    "SQL Bot": {
+        name: "SQL Bot",
+        description: "Helps you write and optimize SQL queries.",
+        avatar: "sql-bot-avatar"
+    },
+    "Python Bot": {
+        name: "Python Bot",
+        description: "Assists with Python programming and debugging.",
+        avatar: "python-bot-avatar"
+    },
+    "Java Bot": {
+        name: "Java Bot",
+        description: "Provides support for Java development.",
+        avatar: "java-bot-avatar"
+    },
+    "HTML Bot": {
+        name: "HTML Bot",
+        description: "Guides you through HTML structure and best practices.",
+        avatar: "html-bot-avatar"
+    },
+    "CSS Bot": {
+        name: "CSS Bot",
+        description: "Helps with styling and responsive design using CSS.",
+        avatar: "css-bot-avatar"
+    },
+    "JavaScript Bot": {
+        name: "JavaScript Bot",
+        description: "Assists with JavaScript programming and frameworks.",
+        avatar: "javascript-bot-avatar"
+    },
+    "Ruby Bot": {
+        name: "Ruby Bot",
+        description: "Supports Ruby and Ruby on Rails development.",
+        avatar: "ruby-bot-avatar"
+    },
+    "PHP Bot": {
+        name: "PHP Bot",
+        description: "Provides assistance for PHP development.",
+        avatar: "php-bot-avatar"
+    },
+    "C++ Bot": {
+        name: "C++ Bot",
+        description: "Helps with C++ programming and algorithms.",
+        avatar: "cpp-bot-avatar"
+    }
 };
 
 // Variable to store the currently selected image
@@ -94,11 +180,33 @@ function initializeUIHandlers() {
             
             // Update the active model
             switchActiveModel(name, avatar);
-            
-            // Start a new chat if we're on the main page
-            if (document.querySelector('.main-grid-layout')) {
-                startChatWithPrompt(`Hi, I'd like to chat with ${name}`);
-            }
+
+            // Show chatbot interface in bigger size in main content
+            mainGrid.style.display = 'none';
+            chatbotInterface.style.display = 'flex';
+
+            // Adjust chatbot interface style for bigger display
+            chatbotInterface.style.flexDirection = 'column';
+            chatbotInterface.style.alignItems = 'center';
+            chatbotInterface.style.justifyContent = 'center';
+
+            // Show chatbot name prominently
+            const chatbotNameDisplay = document.getElementById('chatbot-name-display');
+            chatbotNameDisplay.style.fontSize = '3rem';
+            chatbotNameDisplay.style.marginBottom = '0.5rem';
+
+            // Show chatbot description below name
+            const chatbotDescriptionDisplay = document.getElementById('chatbot-description-display');
+            chatbotDescriptionDisplay.style.fontSize = '1.25rem';
+            chatbotDescriptionDisplay.style.textAlign = 'center';
+            chatbotDescriptionDisplay.style.maxWidth = '600px';
+            chatbotDescriptionDisplay.style.margin = '0 auto 2rem auto';
+
+            // Clear chat history for this view
+            chatbotChatHistory.innerHTML = '';
+
+            // Display welcome message
+            addAIMessageToHistory(`Hello! I'm ${name}. How can I help you today?`, chatbotChatHistory);
         });
     });
     
@@ -120,6 +228,32 @@ function switchActiveModel(name, avatarId) {
     // Update the display in the chat input header
     document.querySelector('.chat-input-header .bot-avatar').id = avatarId;
     document.querySelector('.chat-input-header .models-name').textContent = name;
+
+    // Update chatbot interface header
+    const botInfo = botDescriptions[name];
+    if (botInfo) {
+        // Update the chatbot avatar display
+        document.getElementById('chatbot-avatar-display').id = botInfo.avatar;
+        // Update the chatbot name display
+        document.getElementById('chatbot-name-display').textContent = botInfo.name;
+        // Update the chatbot description display
+        document.getElementById('chatbot-description-display').textContent = botInfo.description;
+    } else {
+        // If no specific bot info, use the provided name and avatar ID
+        document.getElementById('chatbot-avatar-display').id = avatarId;
+        document.getElementById('chatbot-name-display').textContent = name;
+        document.getElementById('chatbot-description-display').textContent = "Your AI assistant for various tasks.";
+    }
+
+    // Clear chat history for the chatbot interface
+    chatbotChatHistory.innerHTML = '';
+
+    // Hide main grid and show chatbot interface
+    mainGrid.style.display = 'none';
+    chatbotInterface.style.display = 'flex';
+
+    // Display welcome message for the selected model in the chatbot interface
+    addAIMessageToHistory(`Hello! I'm ${name}. How can I help you today?`, chatbotChatHistory);
 }
 
 // Start a chat with a specific prompt
@@ -147,14 +281,13 @@ async function sendMessage() {
     }
 
     // If we're still on the main page with grid layout, clear it
-    const mainGrid = contentArea.querySelector('.main-grid-layout');
-    if (mainGrid) {
-        contentArea.innerHTML = '';
-        contentArea.appendChild(chatHistory);
+    if (mainGrid.style.display !== 'none') {
+        mainGrid.style.display = 'none';
+        chatbotInterface.style.display = 'flex';
     }
 
-    // Add user message to chat
-    addMessageToHistory(message, true, selectedImage);
+    // Add user message to chat - make sure we're using the chatbot interface chat history
+    addMessageToHistory(message, true, selectedImage, chatbotChatHistory);
 
     // Show loading indicator
     const loadingContainer = document.createElement("div");
@@ -181,7 +314,7 @@ async function sendMessage() {
     loadingContainer.appendChild(profileInfo);
     loadingContainer.appendChild(loadingDiv);
     
-    chatHistory.appendChild(loadingContainer);
+    chatbotChatHistory.appendChild(loadingContainer);
 
     // Clear input field and selected image
     chatInput.value = '';
@@ -213,18 +346,18 @@ async function sendMessage() {
         const data = await response.json();
 
         // Remove loading indicator
-        chatHistory.removeChild(loadingContainer);
+chatbotChatHistory.removeChild(loadingContainer);
 
         if (data.error) {
-            addAIMessageToHistory("Error: " + data.error);
+            addAIMessageToHistory("Error: " + data.error, chatbotChatHistory);
         } else {
             // Add AI response to chat
-            addAIMessageToHistory(data.response);
+addAIMessageToHistory(data.response, chatbotChatHistory);
         }
     } catch (error) {
         // Remove loading indicator and show error
-        chatHistory.removeChild(loadingContainer);
-        addAIMessageToHistory("Error: Unable to connect to the server. Please try again.");
+chatbotChatHistory.removeChild(loadingContainer);
+        addAIMessageToHistory("Error: Unable to connect to the server. Please try again.", chatbotChatHistory);
     }
 }
 
@@ -470,7 +603,7 @@ function hideRecordingIndicator() {
 }
 
 // Append user message to chat history
-function addMessageToHistory(message, isUser = false, image = null) {
+function addMessageToHistory(message, isUser = false, image = null, targetChatHistory = chatHistory) {
     const messageContainer = document.createElement("div");
     messageContainer.className = isUser ? "message-container user-container" : "message-container ai-container";
 
@@ -545,12 +678,12 @@ function addMessageToHistory(message, isUser = false, image = null) {
         messageContainer.appendChild(messageContentWrapper);
     }
 
-    chatHistory.appendChild(messageContainer);
-    chatHistory.scrollTop = chatHistory.scrollHeight;
+    targetChatHistory.appendChild(messageContainer);
+    targetChatHistory.scrollTop = targetChatHistory.scrollHeight;
 }
 
 // Append AI message to chat history (with HTML support)
-function addAIMessageToHistory(htmlContent) {
+function addAIMessageToHistory(htmlContent, targetChatHistory = chatHistory) {
     const messageContainer = document.createElement("div");
     messageContainer.className = "message-container ai-container";
 
@@ -582,8 +715,8 @@ function addAIMessageToHistory(htmlContent) {
     messageContainer.appendChild(profileInfo);
     messageContainer.appendChild(messageDiv);
 
-    chatHistory.appendChild(messageContainer);
-    chatHistory.scrollTop = chatHistory.scrollHeight;
+    targetChatHistory.appendChild(messageContainer);
+    targetChatHistory.scrollTop = targetChatHistory.scrollHeight;
 }
 
 // Handle send button click

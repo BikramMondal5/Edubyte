@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edubyte - AI powered educational platform</title>
+    <title>Articuno.AI - AI powered educational platform</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.2.0/github-markdown.min.css">
     <link rel="stylesheet" href="{{ url_for('static',filename='styles.css') }}">
@@ -18,8 +18,8 @@
 
         <div class="bots-list">
             <div class="bot-item">
-                <div class="bot-avatar" id ="edubyte-avatar"></div>
-                <span>Edubyte</span>
+                <div class="bot-avatar" id ="Articuno-avatar"></div>
+                <span>Articuno.AI</span>
             </div>
             <div class="bot-item">
                 <div class="bot-avatar" id="gpt-4o-avatar"></div>
@@ -96,7 +96,7 @@
         <div id="content-area" class="content-area">
             <div class="main-grid-layout">
                 <div class="welcome-header">
-                    <h1>Welcome to <span class="edubyte-text">Edubyte!</span></h1>
+                    <h1>Welcome to <span class="edubyte-text">Articuno.AI!</span></h1>
                     <p class="welcome-subtitle">🤖🪄 Interact. Innovate. Inspire with AI</p>
                 </div>
                 
@@ -274,14 +274,26 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Chatbot Interface -->
+            <div id="chatbot-interface" class="chatbot-interface" style="display: none;">
+                <div class="chatbot-header">
+                    <div class="chatbot-avatar" id="chatbot-avatar-display"></div>
+                    <div class="chatbot-info">
+                        <h2 id="chatbot-name-display"></h2>
+                        <p id="chatbot-description-display"></p>
+                    </div>
+                </div>
+                <div class="chat-history" id="chatbot-chat-history"></div>
+            </div>
         </div>
 
         <!-- Bottom Bar -->
         <div class="bottom-bar">
             <div id="msg-container" class="chat-input-container">
                 <div class="chat-input-header">
-                    <div class="bot-avatar" id="edubyte-avatar"></div>
-                    <span class="models-name">Edubyte</span>
+                    <div class="bot-avatar" id="Articuno-avatar"></div>
+                    <span class="models-name">Articuno.AI</span>
                 </div>
                 <div id="options" class="chat-input-footer">
                     <input class="chat-input" placeholder="Ask me anything...">

@@ -131,8 +131,8 @@ body {
     display: flex;
     flex-direction: column;
     background-color: #0f0f0f;
-    background-image: radial-gradient(circle, rgba(37, 38, 43, 0.7) 1px, transparent 1px);
-    background-size: 20px 20px;
+    background-image: radial-gradient(circle, rgba(37, 38, 43, 0.9) 1px, transparent 1px);
+    background-size: 15px 15px;
     background-position: 0 0;
 }
 
@@ -833,4 +833,56 @@ body {
 /* Style for microphone button when recording */
 .control-button i.recording {
     color: #ff5c74;
+}
+
+#Articuno-avatar{
+    background-image: url("icons/articuno.png");
+    background-size: cover;
+    background-position: center;
+}
+
+/* Chatbot Interface Styles */
+.chatbot-interface {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+    background-color: #0f0f0f;
+}
+
+.chatbot-header {
+    display: flex;
+    align-items: center;
+    padding: 15px 20px;
+    border-bottom: 1px solid #2D2D2D;
+    background-color: #1a1a1a;
+    gap: 15px;
+}
+
+.chatbot-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background-size: cover;
+    background-position: center;
+    flex-shrink: 0;
+}
+
+.chatbot-info h2 {
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.chatbot-info p {
+    font-size: 14px;
+    color: #a0a0a0;
+}
+
+#chatbot-chat-history {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
 }
