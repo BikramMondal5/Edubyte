@@ -825,9 +825,9 @@ body {
 
 /* Animation for recording indicator */
 @keyframes pulse {
-    0% { opacity: 0.6; transform: scale(0.9); }
-    50% { opacity: 1; transform: scale(1.1); }
-    100% { opacity: 0.6; transform: scale(0.9); }
+    0% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(1.2); }
+    100% { opacity: 1; transform: scale(1); }
 }
 
 /* Style for microphone button when recording */
@@ -885,4 +885,117 @@ body {
     padding: 20px;
     display: flex;
     flex-direction: column;
+}
+
+/* Chatbot Showcase Styles */
+.chatbot-showcase {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    padding: 2rem;
+    text-align: center;
+}
+
+.showcase-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.showcase-avatar {
+    width: 120px;
+    height: 120px;
+    background: #3D3D3D;
+    border-radius: 50%;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    border: 3px solid #a855f7;
+    box-shadow: 0 8px 32px rgba(168, 85, 247, 0.3);
+    transition: all 0.3s ease;
+}
+
+.showcase-avatar:hover {
+    transform: scale(1.05);
+    box-shadow: 0 12px 40px rgba(168, 85, 247, 0.4);
+}
+
+.showcase-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: white;
+    margin: 0;
+    line-height: 1.2;
+    background: linear-gradient(135deg, #a855f7, #c084fc);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.showcase-description {
+    font-size: 1.125rem;
+    color: #a0a0a0;
+    margin: 0;
+    line-height: 1.6;
+    max-width: 500px;
+}
+
+.start-chat-btn {
+    background: linear-gradient(135deg, #a855f7, #c084fc);
+    color: white;
+    border: none;
+    padding: 12px 32px;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 16px rgba(168, 85, 247, 0.3);
+}
+
+.start-chat-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(168, 85, 247, 0.4);
+    background: linear-gradient(135deg, #9333ea, #a855f7);
+}
+
+.start-chat-btn:active {
+    transform: translateY(0);
+}
+
+/* Bot avatar specific backgrounds */
+#showcase-avatar.Articuno-avatar {
+    background-image: url('icons/articuno-logo-icon.png');
+}
+
+#showcase-avatar.gpt-4o-avatar {
+    background-image: url('icons/gpt-4o-logo-icon.png');
+}
+
+#showcase-avatar.DeepSeek-avatar {
+    background-image: url('icons/deepseek-logo-icon.png');
+}
+
+#showcase-avatar.gemini-avatar {
+    background-image: url('icons/gemini-logo-icon.png');
+}
+
+#showcase-avatar.recipe-queen-avatar {
+    background-image: url('icons/recipe-queen-logo-icon.png');
+}
+
+/* Active bot item styling */
+.bot-item.active {
+    background: #2D2D2D;
+    border-left: 3px solid #a855f7;
+}
+
+.bot-item.active .bot-avatar {
+    border: 2px solid #a855f7;
+    box-shadow: 0 0 12px rgba(168, 85, 247, 0.3);
 }

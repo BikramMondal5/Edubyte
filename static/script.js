@@ -178,37 +178,39 @@ function initializeUIHandlers() {
             const name = botItem.querySelector('span').textContent;
             const avatar = botItem.querySelector('.bot-avatar').id;
             
+            // Remove active class from all bot items
+            document.querySelectorAll('.bot-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            // Add active class to clicked bot item
+            botItem.classList.add('active');
+            
             // Update the active model
             switchActiveModel(name, avatar);
 
-            // Show chatbot interface in bigger size in main content
-            mainGrid.style.display = 'none';
-            chatbotInterface.style.display = 'flex';
-
-            // Adjust chatbot interface style for bigger display
-            chatbotInterface.style.flexDirection = 'column';
-            chatbotInterface.style.alignItems = 'center';
-            chatbotInterface.style.justifyContent = 'center';
-
-            // Show chatbot name prominently
-            const chatbotNameDisplay = document.getElementById('chatbot-name-display');
-            chatbotNameDisplay.style.fontSize = '3rem';
-            chatbotNameDisplay.style.marginBottom = '0.5rem';
-
-            // Show chatbot description below name
-            const chatbotDescriptionDisplay = document.getElementById('chatbot-description-display');
-            chatbotDescriptionDisplay.style.fontSize = '1.25rem';
-            chatbotDescriptionDisplay.style.textAlign = 'center';
-            chatbotDescriptionDisplay.style.maxWidth = '600px';
-            chatbotDescriptionDisplay.style.margin = '0 auto 2rem auto';
-
-            // Clear chat history for this view
-            chatbotChatHistory.innerHTML = '';
-
-            // Display welcome message
-            addAIMessageToHistory(`Hello! I'm ${name}. How can I help you today?`, chatbotChatHistory);
+            // Show chatbot showcase
+            showChatbotShowcase(name, avatar);
         });
     });
+    
+    // Start chat button functionality
+    const startChatBtn = document.getElementById('start-chat-btn');
+    if (startChatBtn) {
+        startChatBtn.addEventListener('click', () => {
+            // Get current selected bot info
+            const showcaseTitle = document.getElementById('showcase-title').textContent;
+            const showcaseAvatar = document.getElementById('showcase-avatar').className;
+            
+            // Hide showcase and show chat interface
+            document.getElementById('chatbot-showcase').style.display = 'none';
+            chatbotInterface.style.display = 'flex';
+            
+            // Clear and setup chat history
+            chatbotChatHistory.innerHTML = '';
+            addAIMessageToHistory(`Hello! I'm ${showcaseTitle}. How can I help you today?`, chatbotChatHistory);
+        });
+    }
     
     // Recent chat items click handling
     document.querySelectorAll('.recent-chat-item').forEach(item => {
@@ -225,24 +227,9 @@ function switchActiveModel(name, avatarId) {
     assistantProfile.name = name;
     assistantProfile.avatar = avatarId;
     
-    // Update the display in the chat input header
-    document.querySelector('.chat-input-header .bot-avatar').id = avatarId;
-    document.querySelector('.chat-input-header .models-name').textContent = name;
-
-    // Update chatbot interface header
-    const botInfo = botDescriptions[name];
-    if (botInfo) {
-        // Update the chatbot avatar display
-        document.getElementById('chatbot-avatar-display').id = botInfo.avatar;
-        // Update the chatbot name display
-        document.getElementById('chatbot-name-display').textContent = botInfo.name;
-        // Update the chatbot description display
-        document.getElementById('chatbot-description-display').textContent = botInfo.description;
-    } else {
-        // If no specific bot info, use the provided name and avatar ID
-        document.getElementById('chatbot-avatar-display').id = avatarId;
-        document.getElementById('chatbot-name-display').textContent = name;
-        document.getElementById('chatbot-description-display').textContent = "Your AI assistant for various tasks.";
+    // Update the chatbot header info
+    if (chatbotName) {
+        chatbotName.textContent = name;
     }
 
     // Clear chat history for the chatbot interface
@@ -254,6 +241,40 @@ function switchActiveModel(name, avatarId) {
 
     // Display welcome message for the selected model in the chatbot interface
     addAIMessageToHistory(`Hello! I'm ${name}. How can I help you today?`, chatbotChatHistory);
+}
+
+// Show chatbot showcase in main content area
+function showChatbotShowcase(name, avatarId) {
+    // Hide main grid layout and chatbot interface
+    const mainGrid = document.querySelector('.main-grid-layout');
+    const chatbotShowcase = document.getElementById('chatbot-showcase');
+    const chatbotInterface = document.getElementById('chatbot-interface');
+    
+    if (mainGrid) mainGrid.style.display = 'none';
+    if (chatbotInterface) chatbotInterface.style.display = 'none';
+    if (chatbotShowcase) chatbotShowcase.style.display = 'flex';
+    
+    // Update showcase content
+    const showcaseAvatar = document.getElementById('showcase-avatar');
+    const showcaseTitle = document.getElementById('showcase-title');
+    const showcaseDescription = document.getElementById('showcase-description');
+    
+    if (showcaseAvatar) {
+        showcaseAvatar.className = `showcase-avatar ${avatarId}`;
+    }
+    
+    if (showcaseTitle) {
+        showcaseTitle.textContent = name;
+    }
+    
+    if (showcaseDescription) {
+        const botInfo = botDescriptions[name];
+        if (botInfo) {
+            showcaseDescription.textContent = botInfo.description;
+        } else {
+            showcaseDescription.textContent = `Your AI assistant for various tasks and conversations.`;
+        }
+    }
 }
 
 // Start a chat with a specific prompt
