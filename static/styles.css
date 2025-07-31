@@ -657,6 +657,16 @@ body {
 .user-message {
     background-color: #3B82F6;
     color: white;
+    white-space: normal;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    display: inline-block;
+    text-align: left;
+    direction: ltr;
+    unicode-bidi: normal;
+    font-family: inherit;
+    word-spacing: normal;
+    letter-spacing: normal;
 }
 
 .ai-message {
@@ -816,6 +826,8 @@ body {
     display: flex;
     flex-direction: column;
     align-items: flex-end;
+    width: 100%;
+    text-align: right;
 }
 
 .ai-message-content {
