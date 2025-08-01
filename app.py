@@ -313,7 +313,10 @@ def detect_location_from_message(message):
         r"(?:show|get|tell|give)(?:.+?)weather(?:.+?)(?:of|for|in|at)\s+([A-Za-z\s,]+)",  # "give me weather of London"
         r"(?:show|get|tell|give)(?:.+?)(?:of|for|in|at)\s+([A-Za-z\s,]+?)(?:\s+weather|\?|$)",  # "give me of London weather"
         r"(?:how is|what is|what's)(?:.+?)weather(?:.+?)(?:of|for|in|at)\s+([A-Za-z\s,]+)",  # "how is the weather in London"
-        r"(?:how's|what's)(?:.+?)(?:of|for|in|at)\s+([A-Za-z\s,]+?)(?:\s+weather|\?|$)"  # "what's in London weather like"
+        r"(?:how's|what's)(?:.+?)(?:of|for|in|at)\s+([A-Za-z\s,]+?)(?:\s+weather|\?|$)",  # "what's in London weather like"
+        r"(?:temperature|forecast|climate|humidity|wind|conditions)(?:.+?)(?:in|at|for)\s+([A-Za-z\s,]+)",  # "temperature in Berlin"
+        r"(?:will it rain|is it sunny|is it hot|is it cold)(?:.+?)(?:in|at)\s+([A-Za-z\s,]+)",  # "will it rain in Seattle"
+        r"what's the (?:weather|temperature|forecast)(?:.+?)(?:in|at|for)\s+([A-Za-z\s,]+)"  # "what's the forecast for Chicago"
     ]
     
     for pattern in location_patterns:
@@ -335,7 +338,8 @@ def detect_location_from_message(message):
             "what", "where", "when", "why", "how", "can", "could", "would", 
             "should", "will", "shall", "the", "this", "that", "these", "those",
             "give", "show", "tell", "about", "weather", "forecast", "temperature",
-            "conditions"
+            "conditions", "articuno", "hello", "thanks", "thank", "please", "good",
+            "morning", "afternoon", "evening", "night", "today", "tomorrow", "yesterday"
         ]:
             return clean_word
     
@@ -411,6 +415,21 @@ def format_weather_data_for_gemini(weather_data, location):
         weather_main = current["weather"][0]["main"]
         wind_speed = current["wind"]["speed"]
         
+        # Get pressure and visibility if available
+        pressure = current["main"].get("pressure", "N/A")
+        visibility = current.get("visibility", "N/A")
+        if visibility != "N/A":
+            visibility = visibility / 1000  # Convert from meters to kilometers
+        
+        # Extract sunrise and sunset times if available
+        sunrise = sunset = "N/A"
+        if "sys" in current and "sunrise" in current["sys"] and "sunset" in current["sys"]:
+            sunrise_timestamp = current["sys"]["sunrise"]
+            sunset_timestamp = current["sys"]["sunset"]
+            from datetime import datetime
+            sunrise = datetime.fromtimestamp(sunrise_timestamp).strftime('%H:%M')
+            sunset = datetime.fromtimestamp(sunset_timestamp).strftime('%H:%M')
+        
         # Extract location data
         city_name = current["name"]
         country = current["sys"]["country"]
@@ -437,11 +456,33 @@ def format_weather_data_for_gemini(weather_data, location):
                 # Calculate average temp for the day
                 avg_temp = sum(item["main"]["temp"] for item in items) / len(items)
                 
+                # Calculate min and max temps
+                min_temp = min(item["main"]["temp_min"] for item in items)
+                max_temp = max(item["main"]["temp_max"] for item in items)
+                
                 # Find most common weather condition
                 conditions = [item["weather"][0]["main"] for item in items]
                 most_common_condition = max(set(conditions), key=conditions.count)
                 
-                forecast_text += f"- {date}: Average temperature {avg_temp:.1f}°C, {most_common_condition}\n"
+                # Get detailed description of most common condition
+                condition_desc = next((item["weather"][0]["description"] for item in items 
+                                      if item["weather"][0]["main"] == most_common_condition), most_common_condition)
+                
+                # Calculate average precipitation probability if available
+                precipitation_prob = 0
+                precipitation_count = 0
+                for item in items:
+                    if "pop" in item:
+                        precipitation_prob += item["pop"]
+                        precipitation_count += 1
+                
+                if precipitation_count > 0:
+                    avg_precipitation_prob = (precipitation_prob / precipitation_count) * 100  # Convert to percentage
+                    precipitation_text = f", {avg_precipitation_prob:.0f}% chance of precipitation"
+                else:
+                    precipitation_text = ""
+                
+                forecast_text += f"- {date}: {min_temp:.1f}°C to {max_temp:.1f}°C (avg: {avg_temp:.1f}°C), {condition_desc}{precipitation_text}\n"
         
         # Format the weather data as a prompt for Gemini
         prompt = f"""Weather data for {city_name}, {country} (User asked about: {location}):
@@ -451,9 +492,20 @@ Current conditions:
 - Weather: {weather_desc} ({weather_main})
 - Humidity: {humidity}%
 - Wind speed: {wind_speed} m/s
+- Air pressure: {pressure} hPa
+- Visibility: {visibility if visibility != "N/A" else "N/A"} km
+- Sunrise: {sunrise}
+- Sunset: {sunset}
 {forecast_text}
 
-Now, provide a friendly and helpful response about this weather information to the user. Use emojis, formatting, and a conversational tone. Include useful advice based on the weather conditions.
+Now, provide a friendly and helpful response about this weather information to the user. Be conversational and engaging. Use emojis appropriately to enhance the message. Include practical advice based on the weather conditions (what to wear, precautions to take, etc.). End with a friendly follow-up question.
+
+Remember to present the information in a well-structured way, including:
+1. A warm greeting that references the location
+2. Current weather conditions with a friendly tone
+3. Forecast information for the next few days
+4. Practical advice based on the conditions
+5. A friendly question or suggestion to keep the conversation going
 """
         return prompt
     except Exception as e:
@@ -471,12 +523,12 @@ def process_articuno_weather_request(user_input, image_data=None):
         }
         
         # Create weather-focused system prompt
-        weather_system_prompt = """Welcome to Articuno.AI – your friendly weather assistant!
+        weather_system_prompt = """Welcome to Articuno.AI – your friendly weather assistant! ❄️
 You're here to help users explore weather updates with style, clarity, and a touch of personality 😊
 
 Your Role:
 
-You are a polite, knowledgeable, and conversational assistant.
+You are a polite, knowledgeable, and conversational assistant that specializes in weather information.
 
 Your answers should be concise, friendly, and easy to understand – even for someone not familiar with weather terms.
 
@@ -484,26 +536,30 @@ You may use emojis sparingly to enhance friendliness, but never in the middle of
 
 If a user shares a location, provide current weather info and a quick summary of the next 2–3 days.
 
-If the user clicks "Use My Location", confirm their location and offer immediate results.
+Always address the user's specific question about weather and provide helpful context based on the conditions.
 
-Guide users clearly when they need help typing a location or understanding weather data.
+Provide practical advice based on the weather conditions (e.g., "Don't forget your umbrella!" for rain).
 
 Tone & Style:
 
-Be warm, responsive, and never robotic.
+Be warm, responsive, and conversational - like a friendly meteorologist.
 
 Use short paragraphs and bullet points if helpful.
 
 End most responses with a gentle question or suggestion to keep the flow going.
-(e.g., "Would you like a forecast for the next few days?" or "Want me to break this down in simple terms?")
+(e.g., "Would you like a forecast for the next few days?" or "Is there anything else about the weather you'd like to know?")
 
 Example Starters:
 
-🌤️ "Looks like it's sunny in Kolkata! Want to know what's coming this weekend?"
+🌤️ "Looks like it's sunny in [Location]! Want to know what's coming this weekend?"
 
-🌧️ "Rain ahead in London! Don't forget your umbrella ☔ Ready for a 3-day forecast?"
+🌧️ "Rain ahead in [Location]! Don't forget your umbrella ☔ Ready for a 3-day forecast?"
 
-🌡️ "It's currently 30°C with light winds. Want me to check humidity too?"
+🌡️ "It's currently [Temperature]°C with light winds in [Location]. Want me to check humidity too?"
+
+Special Cases:
+If the user asks about weather but doesn't specify a location, politely ask them for a location.
+If the user asks about non-weather topics, gently remind them that you're a weather specialist but still try to help.
 """
         
         # Create the model
