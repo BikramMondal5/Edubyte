@@ -62,6 +62,60 @@ app = Flask(__name__)
 def home_page():
     return render_template('index.html')
 
+@app.route('/api/weather', methods=["GET"])
+def get_weather():
+    """API endpoint for fetching weather data"""
+    # Get request parameters
+    location = request.args.get('location')
+    lat = request.args.get('lat')
+    lon = request.args.get('lon')
+    request_type = request.args.get('type', 'current')  # 'current' or 'forecast'
+    
+    if not location and not (lat and lon):
+        return jsonify({"error": "Missing location or coordinates"}), 400
+    
+    try:
+        # Build API URL based on request type
+        if request_type == 'current':
+            endpoint = f"{OPENWEATHER_BASE_URL}/weather"
+        else:
+            endpoint = f"{OPENWEATHER_BASE_URL}/forecast"
+        
+        # Build request parameters
+        params = {
+            "appid": OPENWEATHER_API_KEY,
+            "units": "metric"  # Use metric units (Celsius)
+        }
+        
+        # Add location or coordinates to the parameters
+        if location:
+            params["q"] = location
+        else:
+            params["lat"] = lat
+            params["lon"] = lon
+        
+        # Make the request to the OpenWeather API
+        print(f"Making request to {endpoint} with params: {params}")
+        response = requests.get(endpoint, params=params)
+        
+        # Check for errors
+        if response.status_code != 200:
+            error_message = response.json().get('message', 'Unknown error')
+            print(f"Error from OpenWeather API: {response.status_code} - {error_message}")
+            return jsonify({
+                "error": f"Weather API error: {response.status_code} - {error_message}",
+                "success": False
+            }), response.status_code
+        
+        # Return the weather data
+        data = response.json()
+        return jsonify(data)
+    
+    except Exception as e:
+        print(f"Error fetching weather data: {str(e)}")
+        traceback.print_exc()
+        return jsonify({"error": str(e), "success": False}), 500
+
 def get_image_data_url(image_data, image_format):
     """
     Converts image binary data to a data URL string.
