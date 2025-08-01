@@ -232,14 +232,13 @@ function initializeUIHandlers() {
     if (modalCloseBtn) {
         modalCloseBtn.addEventListener('click', () => {
             hideWeatherModal();
-        });
-    }
-
-    // Use current location button
-    const useLocationBtn = document.getElementById('use-location-btn');
-    if (useLocationBtn) {
-        useLocationBtn.addEventListener('click', () => {
-            useCurrentLocation();
+            
+            // When user manually closes the modal, navigate to chat interface
+            document.getElementById('chatbot-showcase').style.display = 'none';
+            chatbotInterface.style.display = 'flex';
+            
+            // Add a welcome message to the chat
+            addAIMessageToHistory(`Hello! I'm Articuno.AI, your weather assistant. I've analyzed the weather for you. How else can I help with weather information?`, chatbotChatHistory);
         });
     }
 
@@ -248,18 +247,8 @@ function initializeUIHandlers() {
     if (startAnalyzingBtn) {
         startAnalyzingBtn.addEventListener('click', () => {
             startWeatherAnalysis();
-            
-            // After analyzing weather, hide the modal and show the chat interface
-            setTimeout(() => {
-                hideWeatherModal();
-                
-                // Hide showcase and show chat interface
-                document.getElementById('chatbot-showcase').style.display = 'none';
-                chatbotInterface.style.display = 'flex';
-                
-                // Add a welcome message to the chat
-                addAIMessageToHistory(`Hello! I'm Articuno.AI, your weather assistant. I've analyzed the weather for you. How else can I help with weather information?`, chatbotChatHistory);
-            }, 1500);
+            // We don't automatically hide modal or navigate to chat anymore
+            // The modal will stay open until user clicks the close button
         });
     }
 }
@@ -1282,4 +1271,11 @@ document.addEventListener('DOMContentLoaded', () => {
             startChatWithPrompt();
         }
     });
+    
+    // Make sure the "Use Current Location" button has a working event listener
+    const useLocationBtn = document.getElementById('use-location-btn');
+    if (useLocationBtn) {
+        console.log('Adding direct event listener to Use Location button');
+        useLocationBtn.addEventListener('click', useCurrentLocation);
+    }
 });
