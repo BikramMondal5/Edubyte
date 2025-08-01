@@ -12,11 +12,15 @@ from pydub import AudioSegment
 import google.generativeai as genai
 import re
 import traceback
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Set FFmpeg path explicitly
 try:
-    # Use the specific FFmpeg path provided by the user
-    ffmpeg_path = r"C:\Program Files\ffmpeg-7.1.1-essentials_build\ffmpeg-7.1.1-essentials_build\bin\ffmpeg.exe"
+    # Use the specific FFmpeg path from environment variable
+    ffmpeg_path = os.getenv("FFMPEG_PATH")
     
     if os.path.isfile(ffmpeg_path):
         AudioSegment.converter = ffmpeg_path
@@ -44,11 +48,11 @@ except Exception as e:
     print(f"Error setting FFmpeg path: {str(e)}")
 
 # Configure Google Gemini API
-GEMINI_API_KEY = "AIzaSyCAk4mkNVUtb3Fqi1SoU_a4y6r7_sWhxxs"
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 genai.configure(api_key=GEMINI_API_KEY)
 
 # Configure OpenWeather API
-OPENWEATHER_API_KEY = "ad68b088e28ee68d6181c931174d3440"
+OPENWEATHER_API_KEY = os.getenv("OPENWEATHER_API_KEY")
 OPENWEATHER_BASE_URL = "https://api.openweathermap.org/data/2.5"
 
 # Initializing the app
@@ -580,10 +584,10 @@ def process_gemini_request(user_input, image_data=None):
 
 def process_azure_openai_request(user_input, image_data=None):
     """Process chat request using Azure OpenAI API"""
-    # OpenAI API Configuration
-    token = os.environ.get("Edubyte") # Add your API key here
-    endpoint = "https://models.inference.ai.azure.com"
-    model_name = "gpt-4o"
+    # OpenAI API Configuration from environment variables
+    token = os.getenv("AZURE_OPENAI_API_KEY")
+    endpoint = os.getenv("AZURE_OPENAI_ENDPOINT")
+    model_name = os.getenv("AZURE_OPENAI_MODEL")
     
     try:
         # Prepare headers

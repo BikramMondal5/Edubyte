@@ -31,6 +31,7 @@ const chatbotAvatar = document.querySelector('.chatbot-avatar');
 const chatbotName = document.querySelector('.chatbot-info h2');
 const chatbotDescription = document.querySelector('.chatbot-info p');
 const chatbotChatHistory = document.getElementById('chatbot-chat-history');
+const chatGridContainer = document.getElementById('chat-grid-container');
 
 // Create chat history container if it doesn't exist
 let chatHistory = document.querySelector(".chat-history");
@@ -955,14 +956,15 @@ function hideWeatherModal() {
 }
 
 // OpenWeatherMap API settings
-const weatherApiKey = 'ad68b088e28ee68d6181c931174d3440'; // Updated API key
+// The API key is now managed by the backend using environment variables
 const weatherApiBaseUrl = 'https://api.openweathermap.org/data/2.5';
 
 // Get current weather data from OpenWeatherMap API
 async function fetchCurrentWeather(location) {
     try {
         console.log(`Fetching weather for location: ${location}`);
-        const response = await fetch(`${weatherApiBaseUrl}/weather?q=${encodeURIComponent(location)}&units=metric&appid=${weatherApiKey}`);
+        // Use our backend API to fetch weather data instead of directly calling OpenWeatherMap
+        const response = await fetch(`/api/weather?location=${encodeURIComponent(location)}&type=current`);
         
         if (!response.ok) {
             const errorData = await response.json();
@@ -981,7 +983,8 @@ async function fetchCurrentWeather(location) {
 async function fetchForecast(location) {
     try {
         console.log(`Fetching forecast for location: ${location}`);
-        const response = await fetch(`${weatherApiBaseUrl}/forecast?q=${encodeURIComponent(location)}&units=metric&appid=${weatherApiKey}`);
+        // Use our backend API to fetch forecast data instead of directly calling OpenWeatherMap
+        const response = await fetch(`/api/weather?location=${encodeURIComponent(location)}&type=forecast`);
         
         if (!response.ok) {
             const errorData = await response.json();
@@ -999,7 +1002,8 @@ async function fetchForecast(location) {
 // Get weather by coordinates from OpenWeatherMap API
 async function fetchWeatherByCoords(lat, lon) {
     try {
-        const response = await fetch(`${weatherApiBaseUrl}/weather?lat=${lat}&lon=${lon}&units=metric&appid=${weatherApiKey}`);
+        // Use our backend API to fetch weather data by coordinates
+        const response = await fetch(`/api/weather?lat=${lat}&lon=${lon}&type=current`);
         
         if (!response.ok) {
             throw new Error(`Weather API error: ${response.status}`);
@@ -1015,7 +1019,8 @@ async function fetchWeatherByCoords(lat, lon) {
 // Get forecast by coordinates from OpenWeatherMap API
 async function fetchForecastByCoords(lat, lon) {
     try {
-        const response = await fetch(`${weatherApiBaseUrl}/forecast?lat=${lat}&lon=${lon}&units=metric&appid=${weatherApiKey}`);
+        // Use our backend API to fetch forecast data by coordinates
+        const response = await fetch(`/api/weather?lat=${lat}&lon=${lon}&type=forecast`);
         
         if (!response.ok) {
             throw new Error(`Forecast API error: ${response.status}`);
