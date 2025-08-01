@@ -9,6 +9,7 @@ import io
 import tempfile
 import uuid
 from pydub import AudioSegment
+import google.generativeai as genai
 
 # Set FFmpeg path explicitly
 try:
@@ -39,6 +40,10 @@ try:
             print("FFmpeg not found in common locations. Relying on PATH environment variable.")
 except Exception as e:
     print(f"Error setting FFmpeg path: {str(e)}")
+
+# Configure Google Gemini API
+GEMINI_API_KEY = "AIzaSyCAk4mkNVUtb3Fqi1SoU_a4y6r7_sWhxxs"
+genai.configure(api_key=GEMINI_API_KEY)
 
 # Initializing the app
 app = Flask(__name__)
@@ -204,10 +209,186 @@ def chat():
     data = request.json
     user_input = data.get('message', '')
     image_data = data.get('image', None)
+    bot_name = data.get('bot', 'Articuno.AI')
     
     if not user_input and not image_data:
         return jsonify({"error": "No message or image provided"}), 400
     
+    try:
+        # Check which bot is selected and use appropriate API
+        if bot_name == "Articuno.AI":
+            # Use Gemini with special weather-focused system prompt
+            return process_articuno_weather_request(user_input, image_data)
+        elif bot_name == "Gemini 2.0 Flash" or bot_name.lower() == "gemini":
+            return process_gemini_request(user_input, image_data)
+        else:
+            # Use Azure OpenAI API as fallback
+            return process_azure_openai_request(user_input, image_data)
+    
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+def process_articuno_weather_request(user_input, image_data=None):
+    """Process chat request specifically for Articuno.AI as a weather assistant"""
+    try:
+        # Configure the model
+        generation_config = {
+            "temperature": 0.7,
+            "top_p": 1,
+            "top_k": 32,
+            "max_output_tokens": 1000,
+        }
+        
+        # Create weather-focused system prompt
+        weather_system_prompt = """You are Articuno.AI, a friendly and helpful weather assistant. Your primary purpose is to:
+        
+        1. Help users understand weather conditions for specific locations
+        2. Interpret weather data and explain what it means for users' daily activities
+        3. Provide weather forecasts and recommendations based on weather conditions
+        4. Explain weather phenomena and patterns
+        5. Answer questions about climate and weather-related topics
+        
+        Always assume the user is asking about weather unless they explicitly indicate otherwise. When the user asks about a location, provide current weather conditions and a short forecast if possible.
+        
+        If the user sends an image of weather conditions, clouds, or sky, try to interpret the weather conditions shown in the image.
+        
+        Your tone should be:
+        - Friendly and conversational
+        - Helpful and informative
+        - Clear and concise
+        
+        Format your responses with:
+        - Emoji indicators for weather conditions (☀️🌧️❄️)
+        - Bold formatting for important temperature values
+        - Bullet points for recommendations
+        
+        When users don't specify a location, politely ask which location they'd like to know about.
+        """
+        
+        model = genai.GenerativeModel(
+            model_name="gemini-1.5-flash",
+            generation_config=generation_config,
+            system_instruction=weather_system_prompt
+        )
+        
+        # Handle messages with images
+        if image_data:
+            # Process the image data
+            image_format = image_data.get("format", "jpeg")
+            image_binary = base64.b64decode(image_data.get("data").split(",")[1])
+            
+            # Create image part for multimodal request
+            image_parts = [
+                {
+                    "mime_type": f"image/{image_format}",
+                    "data": image_binary
+                }
+            ]
+            
+            # Generate response with both text and image
+            response = model.generate_content([user_input, image_parts[0]])
+        else:
+            # Text-only request
+            # Enhance the user query with weather context if needed
+            if not any(term in user_input.lower() for term in ['weather', 'temperature', 'forecast', 'rain', 'sunny', 'cloudy', 'wind', 'humidity', 'climate']):
+                enhanced_input = f"Regarding weather information: {user_input}"
+            else:
+                enhanced_input = user_input
+                
+            response = model.generate_content(enhanced_input)
+        
+        # Extract response text
+        markdown_output = response.text
+        html_response = markdown.markdown(markdown_output)
+        
+        return jsonify({"response": html_response})
+    
+    except Exception as e:
+        print(f"Articuno Weather API error: {str(e)}")
+        return jsonify({"error": f"Error with Articuno Weather API: {str(e)}"}), 500
+
+def process_gemini_request(user_input, image_data=None):
+    """Process chat request using Google Gemini API"""
+    try:
+        # Configure the model
+        generation_config = {
+            "temperature": 0.9,
+            "top_p": 1,
+            "top_k": 32,
+            "max_output_tokens": 1000,
+        }
+        
+        # Create system prompt
+        system_prompt = """You are Articuno.AI, a friendly virtual assistant thoughtfully developed by the Edubyte Team to provide 
+        intelligent, user-friendly, and context-aware support. As a helpful assistant, your primary goal is 
+        to deliver accurate, concise, and engaging responses.
+
+        🧠 Identity
+        Name: Articuno.AI
+        Developed by: Edubyte Team
+        Role: Friendly, fast, intelligent and supportive virtual assistant
+
+        📝 Response Structure
+        - Use clear headings (H1, H2, etc.) to organize information logically.
+        - Present details using bullet points or numbered lists where appropriate for readability.
+        - Include spaces after headings and between paragraphs for improved visual clarity.
+        - Integrate appropriate emojis (e.g., ✅📌🚀) to enhance interactivity and user engagement, without overwhelming the message.
+
+        🌟 Tone and Style
+        - Maintain a professional yet friendly tone.
+        - Be concise, yet ensure clarity and completeness.
+        - Adapt your communication style based on the user's intent and tone.
+        """
+        
+        model = genai.GenerativeModel(
+            model_name="gemini-1.5-flash",
+            generation_config=generation_config,
+            system_instruction=system_prompt
+        )
+        
+        # Handle messages with images
+        if image_data:
+            # Process the image data
+            image_format = image_data.get("format", "jpeg")
+            image_binary = base64.b64decode(image_data.get("data").split(",")[1])
+            
+            # Create a temporary file to save the image
+            temp_image_path = os.path.join(tempfile.gettempdir(), f"image_{uuid.uuid4().hex}.{image_format}")
+            with open(temp_image_path, "wb") as f:
+                f.write(image_binary)
+            
+            # Create image part for multimodal request
+            image_parts = [
+                {
+                    "mime_type": f"image/{image_format}",
+                    "data": image_binary
+                }
+            ]
+            
+            # Generate response with both text and image
+            response = model.generate_content([user_input, image_parts[0]])
+            
+            # Clean up temp file
+            try:
+                os.remove(temp_image_path)
+            except:
+                pass
+        else:
+            # Text-only request
+            response = model.generate_content(user_input)
+        
+        # Extract response text
+        markdown_output = response.text
+        html_response = markdown.markdown(markdown_output)
+        
+        return jsonify({"response": html_response})
+    
+    except Exception as e:
+        print(f"Gemini API error: {str(e)}")
+        return jsonify({"error": f"Error with Gemini API: {str(e)}"}), 500
+
+def process_azure_openai_request(user_input, image_data=None):
+    """Process chat request using Azure OpenAI API"""
     # OpenAI API Configuration
     token = os.environ.get("Edubyte") # Add your API key here
     endpoint = "https://models.inference.ai.azure.com"

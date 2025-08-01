@@ -55,7 +55,7 @@ let assistantProfile = {
 const botDescriptions = {
     "Articuno.AI": {
         name: "Articuno.AI",
-        description: "Your AI-powered educational assistant for learning and development.",
+        description: "Your AI-powered weather assistant for forecasts, conditions, and climate information.",
         avatar: "Articuno-avatar"
     },
     "GPT-4o": {
@@ -200,15 +200,22 @@ function initializeUIHandlers() {
         startChatBtn.addEventListener('click', () => {
             // Get current selected bot info
             const showcaseTitle = document.getElementById('showcase-title').textContent;
-            const showcaseAvatar = document.getElementById('showcase-avatar').className;
             
-            // Hide showcase and show chat interface
-            document.getElementById('chatbot-showcase').style.display = 'none';
-            chatbotInterface.style.display = 'flex';
-            
-            // Clear and setup chat history
-            chatbotChatHistory.innerHTML = '';
-            addAIMessageToHistory(`Hello! I'm ${showcaseTitle}. How can I help you today?`, chatbotChatHistory);
+            // Check if it's Articuno.AI to show weather modal
+            if (showcaseTitle === "Articuno.AI") {
+                showWeatherModal();
+            } else {
+                // Original functionality for other bots
+                const showcaseAvatar = document.getElementById('showcase-avatar').className;
+                
+                // Hide showcase and show chat interface
+                document.getElementById('chatbot-showcase').style.display = 'none';
+                chatbotInterface.style.display = 'flex';
+                
+                // Clear and setup chat history
+                chatbotChatHistory.innerHTML = '';
+                addAIMessageToHistory(`Hello! I'm ${showcaseTitle}. How can I help you today?`, chatbotChatHistory);
+            }
         });
     }
     
@@ -219,6 +226,30 @@ function initializeUIHandlers() {
             startChatWithPrompt(topic);
         });
     });
+
+    // Weather modal close button
+    const modalCloseBtn = document.getElementById('modal-close-btn');
+    if (modalCloseBtn) {
+        modalCloseBtn.addEventListener('click', () => {
+            hideWeatherModal();
+        });
+    }
+
+    // Use current location button
+    const useLocationBtn = document.getElementById('use-location-btn');
+    if (useLocationBtn) {
+        useLocationBtn.addEventListener('click', () => {
+            useCurrentLocation();
+        });
+    }
+
+    // Start analyzing button
+    const startAnalyzingBtn = document.getElementById('start-analyzing-btn');
+    if (startAnalyzingBtn) {
+        startAnalyzingBtn.addEventListener('click', () => {
+            startWeatherAnalysis();
+        });
+    }
 }
 
 // Switch the active model/assistant
@@ -278,7 +309,7 @@ function showChatbotShowcase(name, avatarId) {
 }
 
 // Start a chat with a specific prompt
-function startChatWithPrompt(prompt) {
+function startChatWithPrompt(prompt = "") {
     // Clear the main content area
     contentArea.innerHTML = '';
     
@@ -341,7 +372,10 @@ async function sendMessage() {
     chatInput.value = '';
 
     // Prepare the request payload
-    const payload = { message: message };
+    const payload = { 
+        message: message,
+        bot: assistantProfile.name // Include the bot name in the request
+    };
     
     // Add image data if an image is selected
     if (selectedImage) {
@@ -367,17 +401,17 @@ async function sendMessage() {
         const data = await response.json();
 
         // Remove loading indicator
-chatbotChatHistory.removeChild(loadingContainer);
+        chatbotChatHistory.removeChild(loadingContainer);
 
         if (data.error) {
             addAIMessageToHistory("Error: " + data.error, chatbotChatHistory);
         } else {
             // Add AI response to chat
-addAIMessageToHistory(data.response, chatbotChatHistory);
+            addAIMessageToHistory(data.response, chatbotChatHistory);
         }
     } catch (error) {
         // Remove loading indicator and show error
-chatbotChatHistory.removeChild(loadingContainer);
+        chatbotChatHistory.removeChild(loadingContainer);
         addAIMessageToHistory("Error: Unable to connect to the server. Please try again.", chatbotChatHistory);
     }
 }
@@ -751,6 +785,7 @@ chatInput.addEventListener('keypress', (e) => {
     }
 });
 
+
 // Create a hidden file input element for image uploads
 const fileInput = document.createElement('input');
 fileInput.type = 'file';
@@ -821,6 +856,329 @@ function toggleTextareaExpand() {
     } else {
         container.style.height = '160px';
         footer.style.height = '120px';
+    }
+}
+
+// Show the weather modal
+function showWeatherModal() {
+    const modal = document.getElementById('weather-modal-overlay');
+    if (modal) {
+        modal.classList.add('active');
+        
+        // Focus on the location input
+        setTimeout(() => {
+            const locationInput = document.getElementById('location-input');
+            if (locationInput) {
+                locationInput.focus();
+            }
+        }, 300);
+    }
+}
+
+// Hide the weather modal
+function hideWeatherModal() {
+    const modal = document.getElementById('weather-modal-overlay');
+    if (modal) {
+        modal.classList.remove('active');
+    }
+}
+
+// OpenWeatherMap API settings
+const weatherApiKey = 'ad68b088e28ee68d6181c931174d3440'; // Updated API key
+const weatherApiBaseUrl = 'https://api.openweathermap.org/data/2.5';
+
+// Get current weather data from OpenWeatherMap API
+async function fetchCurrentWeather(location) {
+    try {
+        console.log(`Fetching weather for location: ${location}`);
+        const response = await fetch(`${weatherApiBaseUrl}/weather?q=${encodeURIComponent(location)}&units=metric&appid=${weatherApiKey}`);
+        
+        if (!response.ok) {
+            const errorData = await response.json();
+            console.error('Weather API error response:', errorData);
+            throw new Error(`Weather API error: ${response.status} - ${errorData.message || 'Unknown error'}`);
+        }
+        
+        return await response.json();
+    } catch (error) {
+        console.error('Error fetching current weather:', error);
+        throw error;
+    }
+}
+
+// Get forecast data from OpenWeatherMap API
+async function fetchForecast(location) {
+    try {
+        console.log(`Fetching forecast for location: ${location}`);
+        const response = await fetch(`${weatherApiBaseUrl}/forecast?q=${encodeURIComponent(location)}&units=metric&appid=${weatherApiKey}`);
+        
+        if (!response.ok) {
+            const errorData = await response.json();
+            console.error('Forecast API error response:', errorData);
+            throw new Error(`Forecast API error: ${response.status} - ${errorData.message || 'Unknown error'}`);
+        }
+        
+        return await response.json();
+    } catch (error) {
+        console.error('Error fetching forecast:', error);
+        throw error;
+    }
+}
+
+// Get weather by coordinates from OpenWeatherMap API
+async function fetchWeatherByCoords(lat, lon) {
+    try {
+        const response = await fetch(`${weatherApiBaseUrl}/weather?lat=${lat}&lon=${lon}&units=metric&appid=${weatherApiKey}`);
+        
+        if (!response.ok) {
+            throw new Error(`Weather API error: ${response.status}`);
+        }
+        
+        return await response.json();
+    } catch (error) {
+        console.error('Error fetching weather by coordinates:', error);
+        throw error;
+    }
+}
+
+// Get forecast by coordinates from OpenWeatherMap API
+async function fetchForecastByCoords(lat, lon) {
+    try {
+        const response = await fetch(`${weatherApiBaseUrl}/forecast?lat=${lat}&lon=${lon}&units=metric&appid=${weatherApiKey}`);
+        
+        if (!response.ok) {
+            throw new Error(`Forecast API error: ${response.status}`);
+        }
+        
+        return await response.json();
+    } catch (error) {
+        console.error('Error fetching forecast by coordinates:', error);
+        throw error;
+    }
+}
+
+// Process forecast data to get a simplified 3-day forecast
+function processForcastData(forecastData) {
+    const forecasts = forecastData.list;
+    const dailyForecasts = {};
+    
+    // Group forecasts by day
+    forecasts.forEach(forecast => {
+        const date = new Date(forecast.dt * 1000);
+        const day = date.toLocaleDateString('en-US', { weekday: 'short' });
+        
+        if (!dailyForecasts[day]) {
+            dailyForecasts[day] = {
+                temps: [],
+                descriptions: [],
+                icons: [],
+                date: date.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })
+            };
+        }
+        
+        dailyForecasts[day].temps.push(forecast.main.temp);
+        dailyForecasts[day].descriptions.push(forecast.weather[0].description);
+        dailyForecasts[day].icons.push(forecast.weather[0].icon);
+    });
+    
+    // Calculate average temp and most common description for each day
+    const result = Object.keys(dailyForecasts).map(day => {
+        const dayData = dailyForecasts[day];
+        
+        // Calculate average temperature
+        const avgTemp = dayData.temps.reduce((a, b) => a + b, 0) / dayData.temps.length;
+        
+        // Find most common description
+        const descCounts = {};
+        dayData.descriptions.forEach(desc => {
+            descCounts[desc] = (descCounts[desc] || 0) + 1;
+        });
+        const mostCommonDesc = Object.keys(descCounts).reduce((a, b) => 
+            descCounts[a] > descCounts[b] ? a : b);
+            
+        // Find most common icon
+        const iconCounts = {};
+        dayData.icons.forEach(icon => {
+            iconCounts[icon] = (iconCounts[icon] || 0) + 1;
+        });
+        const mostCommonIcon = Object.keys(iconCounts).reduce((a, b) => 
+            iconCounts[a] > iconCounts[b] ? a : b);
+        
+        return {
+            day,
+            date: dayData.date,
+            avgTemp: Math.round(avgTemp),
+            description: mostCommonDesc,
+            icon: mostCommonIcon
+        };
+    });
+    
+    // Return only the first 3 days
+    return result.slice(0, 3);
+}
+
+// Get current location using browser's geolocation API
+function useCurrentLocation() {
+    const locationBtn = document.getElementById('use-location-btn');
+    const originalText = locationBtn.innerHTML;
+    
+    // Show loading state
+    locationBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Detecting location...';
+    
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            async (position) => {
+                try {
+                    // Get coordinates
+                    const lat = position.coords.latitude;
+                    const lon = position.coords.longitude;
+                    
+                    // Fetch current weather data
+                    const weatherData = await fetchWeatherByCoords(lat, lon);
+                    
+                    // Update location input with the city name from API
+                    document.getElementById('location-input').value = weatherData.name;
+                    
+                    // Fetch forecast data
+                    const forecastData = await fetchForecastByCoords(lat, lon);
+                    
+                    // Update weather cards with real data
+                    updateWeatherCardsWithAPIData(weatherData, forecastData);
+                    
+                    // Reset button
+                    locationBtn.innerHTML = originalText;
+                } catch (error) {
+                    console.error("API error:", error);
+                    locationBtn.innerHTML = originalText;
+                    alert("Error fetching weather data. Please try again or enter your location manually.");
+                }
+            },
+            (error) => {
+                // Error with geolocation
+                console.error("Geolocation error:", error);
+                locationBtn.innerHTML = originalText;
+                alert("Unable to get your location. Please enter it manually.");
+            },
+            { timeout: 10000 }
+        );
+    } else {
+        locationBtn.innerHTML = originalText;
+        alert("Geolocation is not supported by your browser. Please enter your location manually.");
+    }
+}
+
+// Update weather cards with API data
+function updateWeatherCardsWithAPIData(weatherData, forecastData) {
+    // Update temperature card
+    const temp = Math.round(weatherData.main.temp);
+    const condition = weatherData.weather[0].description;
+    document.getElementById('temperature-value').textContent = `${temp}°C`;
+    document.getElementById('temperature-description').textContent = condition.charAt(0).toUpperCase() + condition.slice(1);
+    
+    // Update weather icon in temperature card
+    const weatherIcon = document.querySelector('.weather-card:nth-child(1) .weather-card-icon i');
+    const iconCode = weatherData.weather[0].icon;
+    updateWeatherIcon(weatherIcon, iconCode);
+    
+    // Update wind and humidity card
+    const windSpeed = Math.round(weatherData.wind.speed * 3.6); // Convert m/s to km/h
+    const humidity = weatherData.main.humidity;
+    document.getElementById('wind-value').textContent = `${windSpeed} km/h`;
+    document.getElementById('humidity-value').textContent = `Humidity: ${humidity}%`;
+    
+    // Process forecast data for a 3-day summary
+    const dailyForecasts = processForcastData(forecastData);
+    
+    // Update forecast card
+    if (dailyForecasts.length > 0) {
+        // Show next day forecast as primary
+        const nextDay = dailyForecasts[0];
+        document.getElementById('forecast-value').textContent = `${nextDay.avgTemp}°C`;
+        document.getElementById('forecast-description').textContent = `${nextDay.day}: ${nextDay.description}`;
+        
+        // Update forecast icon
+        const forecastIcon = document.querySelector('.weather-card:nth-child(3) .weather-card-icon i');
+        updateWeatherIcon(forecastIcon, nextDay.icon);
+    }
+}
+
+// Update weather icons based on OpenWeatherMap icon codes
+function updateWeatherIcon(iconElement, iconCode) {
+    // Remove all existing classes except the base fa class
+    iconElement.className = '';
+    iconElement.classList.add('fas');
+    
+    // Map OpenWeatherMap icon codes to Font Awesome icons
+    const iconMap = {
+        '01d': 'fa-sun', // clear sky day
+        '01n': 'fa-moon', // clear sky night
+        '02d': 'fa-cloud-sun', // few clouds day
+        '02n': 'fa-cloud-moon', // few clouds night
+        '03d': 'fa-cloud', // scattered clouds
+        '03n': 'fa-cloud',
+        '04d': 'fa-cloud', // broken clouds
+        '04n': 'fa-cloud',
+        '09d': 'fa-cloud-rain', // shower rain
+        '09n': 'fa-cloud-rain',
+        '10d': 'fa-cloud-sun-rain', // rain day
+        '10n': 'fa-cloud-moon-rain', // rain night
+        '11d': 'fa-bolt', // thunderstorm
+        '11n': 'fa-bolt',
+        '13d': 'fa-snowflake', // snow
+        '13n': 'fa-snowflake',
+        '50d': 'fa-smog', // mist
+        '50n': 'fa-smog'
+    };
+    
+    // Add the appropriate icon class
+    if (iconMap[iconCode]) {
+        iconElement.classList.add(iconMap[iconCode]);
+    } else {
+        // Default icon if no mapping exists
+        iconElement.classList.add('fa-cloud');
+    }
+}
+
+// Start weather analysis with real API data
+async function startWeatherAnalysis() {
+    const location = document.getElementById('location-input').value.trim();
+    const analyzeBtn = document.getElementById('start-analyzing-btn');
+    const originalText = analyzeBtn.textContent;
+    
+    if (!location) {
+        alert("Please enter a location or use current location");
+        return;
+    }
+    
+    // Show loading state
+    analyzeBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Analyzing...';
+    
+    try {
+        // Fetch weather data from API
+        const weatherData = await fetchCurrentWeather(location);
+        const forecastData = await fetchForecast(location);
+        
+        // Update the weather cards with the API data
+        updateWeatherCardsWithAPIData(weatherData, forecastData);
+        
+        // Reset button with success message
+        analyzeBtn.innerHTML = '<i class="fas fa-check"></i> Updated';
+        setTimeout(() => {
+            analyzeBtn.textContent = originalText;
+        }, 2000);
+        
+        // Add animation to cards to indicate they've been updated
+        document.querySelectorAll('.weather-card').forEach(card => {
+            card.style.animation = 'none';
+            setTimeout(() => {
+                card.style.animation = 'pulse 1s';
+            }, 10);
+        });
+        
+    } catch (error) {
+        console.error("Error during weather analysis:", error);
+        analyzeBtn.textContent = originalText;
+        alert(`Error fetching weather data for "${location}". Please check the location name and try again.`);
     }
 }
 

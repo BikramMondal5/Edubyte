@@ -1,9 +1,11 @@
-flask
+flask==2.3.3
 azure-ai-inference
 azure-core
-markdown
+markdown==3.5.1
 openai
-SpeechRecognition
+SpeechRecognition==3.10.0
 pyaudio
-pydub
+pydub==0.25.1
 ffmpeg-python
+requests==2.31.0
+google-generativeai==0.3.0

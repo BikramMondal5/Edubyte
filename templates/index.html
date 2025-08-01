@@ -281,7 +281,7 @@
                     <div class="showcase-avatar" id="showcase-avatar"></div>
                     <h1 class="showcase-title" id="showcase-title">Select a Chatbot</h1>
                     <p class="showcase-description" id="showcase-description">Choose a chatbot from the sidebar to get started</p>
-                    <button class="start-chat-btn" id="start-chat-btn">Start Chatting</button>
+                    <button class="start-chat-btn" id="start-chat-btn">Start Analysing</button>
                 </div>
             </div>
 
@@ -335,6 +335,63 @@
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
+    
+    <!-- Weather Modal -->
+    <div id="weather-modal-overlay" class="weather-modal-overlay">
+        <div class="weather-modal">
+            <button id="modal-close-btn" class="modal-close-btn">
+                <i class="fas fa-times"></i>
+            </button>
+            
+            <div class="modal-header">
+                <h2>Weather Analysis</h2>
+                <p>Check weather conditions for your location</p>
+            </div>
+            
+            <div class="location-input-container">
+                <i class="fas fa-map-marker-alt location-input-icon"></i>
+                <input type="text" class="location-input" id="location-input" placeholder="Enter a location (e.g., Kolkata, London)">
+            </div>
+            
+            <button class="use-location-btn" id="use-location-btn">
+                <i class="fas fa-location-arrow"></i>
+                Use My Current Location
+            </button>
+            
+            <div class="weather-cards-container">
+                <div class="weather-card">
+                    <div class="weather-card-icon">
+                        <i class="fas fa-temperature-high"></i>
+                    </div>
+                    <h3>Temperature</h3>
+                    <div class="weather-card-value" id="temperature-value">--°C</div>
+                    <div class="weather-card-description" id="temperature-description">Current condition</div>
+                </div>
+                
+                <div class="weather-card">
+                    <div class="weather-card-icon">
+                        <i class="fas fa-wind"></i>
+                    </div>
+                    <h3>Wind & Humidity</h3>
+                    <div class="weather-card-value" id="wind-value">-- km/h</div>
+                    <div class="weather-card-description" id="humidity-value">Humidity: --%</div>
+                </div>
+                
+                <div class="weather-card">
+                    <div class="weather-card-icon">
+                        <i class="fas fa-cloud-sun"></i>
+                    </div>
+                    <h3>Forecast</h3>
+                    <div class="weather-card-value" id="forecast-value">--</div>
+                    <div class="weather-card-description" id="forecast-description">Next 2-3 days</div>
+                </div>
+            </div>
+            
+            <button class="start-analyzing-btn" id="start-analyzing-btn">
+                Start Analyzing
+            </button>
         </div>
     </div>
 

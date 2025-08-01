@@ -1042,3 +1042,291 @@ body {
     border: 2px solid #a855f7;
     box-shadow: 0 0 12px rgba(168, 85, 247, 0.3);
 }
+
+/* Weather Modal Styles */
+.weather-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+}
+
+.weather-modal-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.weather-modal {
+    width: 90%;
+    max-width: 600px;
+    background: rgba(26, 26, 26, 0.7);
+    backdrop-filter: blur(15px);
+    border-radius: 20px;
+    border: 1px solid rgba(168, 85, 247, 0.3);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 
+                inset 0 0 30px rgba(168, 85, 247, 0.1);
+    padding: 32px;
+    color: white;
+    animation: modalFadeIn 0.5s forwards;
+    position: relative;
+    overflow: hidden;
+}
+
+.weather-modal::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #7e22ce, #a855f7, #c084fc);
+    z-index: 1;
+}
+
+.modal-close-btn {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background: none;
+    border: none;
+    color: #a0a0a0;
+    font-size: 20px;
+    cursor: pointer;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.modal-close-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    transform: rotate(90deg);
+}
+
+.modal-header {
+    text-align: center;
+    margin-bottom: 24px;
+}
+
+.modal-header h2 {
+    font-size: 28px;
+    margin-bottom: 8px;
+    background: linear-gradient(135deg, #a855f7, #c084fc);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.modal-header p {
+    color: #a0a0a0;
+    font-size: 16px;
+}
+
+.location-input-container {
+    margin-bottom: 20px;
+    position: relative;
+}
+
+.location-input {
+    width: 100%;
+    background: rgba(45, 45, 45, 0.6);
+    border: 1px solid rgba(168, 85, 247, 0.3);
+    border-radius: 12px;
+    padding: 14px 14px 14px 45px;
+    color: white;
+    font-size: 16px;
+    transition: all 0.3s;
+    backdrop-filter: blur(5px);
+}
+
+.location-input:focus {
+    outline: none;
+    border-color: #a855f7;
+    box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.25), 
+                0 0 20px rgba(168, 85, 247, 0.2);
+}
+
+.location-input::placeholder {
+    color: #8f8f8f;
+}
+
+.location-input-icon {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #a855f7;
+}
+
+.use-location-btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(45, 45, 45, 0.6);
+    border: 1px solid rgba(168, 85, 247, 0.3);
+    border-radius: 12px;
+    padding: 12px 16px;
+    color: white;
+    font-size: 16px;
+    width: fit-content;
+    margin: 0 auto 28px;
+    cursor: pointer;
+    transition: all 0.3s;
+    backdrop-filter: blur(5px);
+}
+
+.use-location-btn:hover {
+    background: rgba(55, 55, 55, 0.7);
+    border-color: #a855f7;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(168, 85, 247, 0.2);
+}
+
+.use-location-btn i {
+    color: #a855f7;
+    animation: pulse-glow 2s infinite;
+}
+
+.weather-cards-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 28px;
+}
+
+@media (max-width: 700px) {
+    .weather-cards-container {
+        grid-template-columns: 1fr;
+    }
+}
+
+.weather-card {
+    background: rgba(35, 35, 35, 0.6);
+    backdrop-filter: blur(10px);
+    border-radius: 16px;
+    border: 1px solid rgba(168, 85, 247, 0.2);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    transition: all 0.3s;
+}
+
+.weather-card:hover {
+    transform: translateY(-5px);
+    border-color: rgba(168, 85, 247, 0.5);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2),
+                0 0 20px rgba(168, 85, 247, 0.15);
+}
+
+.weather-card-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: rgba(30, 30, 30, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 12px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.weather-card-icon i {
+    font-size: 24px;
+    color: #a855f7;
+}
+
+.weather-card h3 {
+    font-size: 16px;
+    margin-bottom: 10px;
+    color: #a0a0a0;
+}
+
+.weather-card-value {
+    font-size: 24px;
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.weather-card-description {
+    font-size: 14px;
+    color: #a0a0a0;
+}
+
+.start-analyzing-btn {
+    background: linear-gradient(135deg, #7e22ce, #a855f7, #c084fc);
+    color: white;
+    border: none;
+    width: 100%;
+    padding: 14px;
+    border-radius: 12px;
+    font-size: 18px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    box-shadow: 0 5px 15px rgba(168, 85, 247, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+.start-analyzing-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, 
+        transparent, 
+        rgba(255, 255, 255, 0.2), 
+        transparent);
+    transition: all 0.6s;
+}
+
+.start-analyzing-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(168, 85, 247, 0.4);
+}
+
+.start-analyzing-btn:hover::before {
+    left: 100%;
+}
+
+@keyframes modalFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes pulse-glow {
+    0% {
+        opacity: 0.7;
+    }
+    50% {
+        opacity: 1;
+        text-shadow: 0 0 10px rgba(168, 85, 247, 0.7);
+    }
+    100% {
+        opacity: 0.7;
+    }
+}
