@@ -10,6 +10,8 @@ import tempfile
 import uuid
 from pydub import AudioSegment
 import google.generativeai as genai
+import re
+import traceback
 
 # Set FFmpeg path explicitly
 try:
@@ -44,6 +46,10 @@ except Exception as e:
 # Configure Google Gemini API
 GEMINI_API_KEY = "AIzaSyCAk4mkNVUtb3Fqi1SoU_a4y6r7_sWhxxs"
 genai.configure(api_key=GEMINI_API_KEY)
+
+# Configure OpenWeather API
+OPENWEATHER_API_KEY = "ad68b088e28ee68d6181c931174d3440"
+OPENWEATHER_BASE_URL = "https://api.openweathermap.org/data/2.5"
 
 # Initializing the app
 app = Flask(__name__)
@@ -228,6 +234,150 @@ def chat():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+def detect_location_from_message(message):
+    """
+    Extracts location information from a user message.
+    
+    Args:
+        message (str): The user message to analyze
+        
+    Returns:
+        str or None: Detected location name or None if no location found
+    """
+    # Simple location detection - look for common location query patterns
+    location_patterns = [
+        r"weather\s+(?:in|at|for)\s+([A-Za-z\s,]+)",  # "weather in London"
+        r"(?:in|at)\s+([A-Za-z\s,]+?)(?:\s+weather|\?|$)",  # "in Paris weather"
+        r"^([A-Za-z\s,]+?)(?:\s+weather|\?|$)",  # "Tokyo weather"
+        r"^([A-Za-z\s,]+?)$"  # Just the location name
+    ]
+    
+    for pattern in location_patterns:
+        match = re.search(pattern, message, re.IGNORECASE)
+        if match:
+            location = match.group(1).strip()
+            return location
+    
+    return None
+
+def fetch_weather_data(location):
+    """
+    Fetches weather data from OpenWeather API for a specific location.
+    
+    Args:
+        location (str): The location to fetch weather data for
+        
+    Returns:
+        dict: Weather data for the location or error information
+    """
+    try:
+        # Fetch current weather
+        current_url = f"{OPENWEATHER_BASE_URL}/weather"
+        params = {
+            "q": location,
+            "appid": OPENWEATHER_API_KEY,
+            "units": "metric"  # Use metric units (Celsius)
+        }
+        
+        response = requests.get(current_url, params=params)
+        if response.status_code != 200:
+            return {"error": f"Weather API error: {response.status_code} - {response.json().get('message', 'Unknown error')}"}
+        
+        current_data = response.json()
+        
+        # Fetch forecast (5 days / 3 hours)
+        forecast_url = f"{OPENWEATHER_BASE_URL}/forecast"
+        forecast_response = requests.get(forecast_url, params=params)
+        
+        if forecast_response.status_code != 200:
+            return {
+                "current": current_data,
+                "forecast_error": f"Forecast API error: {forecast_response.status_code}"
+            }
+        
+        forecast_data = forecast_response.json()
+        
+        # Return combined weather data
+        return {
+            "current": current_data,
+            "forecast": forecast_data
+        }
+    except Exception as e:
+        return {"error": f"Error fetching weather data: {str(e)}"}
+
+def format_weather_data_for_gemini(weather_data, location):
+    """
+    Formats weather data into a structured prompt for Gemini model.
+    
+    Args:
+        weather_data (dict): Weather data from OpenWeather API
+        location (str): The location name
+        
+    Returns:
+        str: Formatted weather data prompt
+    """
+    if "error" in weather_data:
+        return f"Error: {weather_data['error']}"
+    
+    try:
+        current = weather_data["current"]
+        
+        # Extract current weather data
+        temp = current["main"]["temp"]
+        feels_like = current["main"]["feels_like"]
+        humidity = current["main"]["humidity"]
+        weather_desc = current["weather"][0]["description"]
+        weather_main = current["weather"][0]["main"]
+        wind_speed = current["wind"]["speed"]
+        
+        # Extract location data
+        city_name = current["name"]
+        country = current["sys"]["country"]
+        
+        # Extract forecast if available
+        forecast_text = ""
+        if "forecast" in weather_data:
+            forecast = weather_data["forecast"]
+            forecast_text = "\n\nForecast for next few days:\n"
+            
+            # Group forecast by day
+            day_forecasts = {}
+            for item in forecast["list"]:
+                dt = item["dt"]
+                date = item["dt_txt"].split(" ")[0]
+                
+                if date not in day_forecasts:
+                    day_forecasts[date] = []
+                
+                day_forecasts[date].append(item)
+            
+            # Generate a summary for each day
+            for date, items in list(day_forecasts.items())[:3]:  # Limit to 3 days
+                # Calculate average temp for the day
+                avg_temp = sum(item["main"]["temp"] for item in items) / len(items)
+                
+                # Find most common weather condition
+                conditions = [item["weather"][0]["main"] for item in items]
+                most_common_condition = max(set(conditions), key=conditions.count)
+                
+                forecast_text += f"- {date}: Average temperature {avg_temp:.1f}°C, {most_common_condition}\n"
+        
+        # Format the weather data as a prompt for Gemini
+        prompt = f"""Weather data for {city_name}, {country} (User asked about: {location}):
+        
+Current conditions:
+- Temperature: {temp}°C (feels like {feels_like}°C)
+- Weather: {weather_desc} ({weather_main})
+- Humidity: {humidity}%
+- Wind speed: {wind_speed} m/s
+{forecast_text}
+
+Now, provide a friendly and helpful response about this weather information to the user. Use emojis, formatting, and a conversational tone. Include useful advice based on the weather conditions.
+"""
+        return prompt
+    except Exception as e:
+        return f"Error formatting weather data: {str(e)}"
+
 def process_articuno_weather_request(user_input, image_data=None):
     """Process chat request specifically for Articuno.AI as a weather assistant"""
     try:
@@ -265,8 +415,21 @@ def process_articuno_weather_request(user_input, image_data=None):
         When users don't specify a location, politely ask which location they'd like to know about.
         """
         
-        # Create the model - fixing the system instruction parameter
+        # Create the model
         model = genai.GenerativeModel(model_name="gemini-1.5-flash", generation_config=generation_config)
+        
+        # Check if the user input contains a location
+        location = detect_location_from_message(user_input)
+        
+        # If location found, fetch weather data
+        weather_data = None
+        weather_prompt = None
+        
+        if location:
+            print(f"Detected location: {location}")
+            weather_data = fetch_weather_data(location)
+            weather_prompt = format_weather_data_for_gemini(weather_data, location)
+            print(f"Formatted weather data: {weather_prompt}")
         
         # Handle messages with images
         if image_data:
@@ -282,29 +445,45 @@ def process_articuno_weather_request(user_input, image_data=None):
                 }
             ]
             
-            # Add system message and create content parts
-            content_parts = [
-                {"role": "user", "parts": [{"text": weather_system_prompt}]},
-                {"role": "model", "parts": [{"text": "I understand. I'll be Articuno.AI, your weather assistant."}]},
-                {"role": "user", "parts": [{"text": user_input}, image_parts[0]]}
-            ]
+            # Prepare content parts with system instructions and weather data if available
+            if weather_prompt:
+                # Include weather data in the prompt
+                content_parts = [
+                    {"role": "user", "parts": [{"text": weather_system_prompt}]},
+                    {"role": "model", "parts": [{"text": "I understand. I'll be Articuno.AI, your weather assistant."}]},
+                    {"role": "user", "parts": [{"text": f"{user_input}\n\n{weather_prompt}"}, image_parts[0]]}
+                ]
+            else:
+                # No weather data, just use system prompt and user input
+                content_parts = [
+                    {"role": "user", "parts": [{"text": weather_system_prompt}]},
+                    {"role": "model", "parts": [{"text": "I understand. I'll be Articuno.AI, your weather assistant."}]},
+                    {"role": "user", "parts": [{"text": user_input}, image_parts[0]]}
+                ]
             
             # Generate response with both text and image
             response = model.generate_content(content_parts)
         else:
             # Text-only request
-            # Enhance the user query with weather context if needed
-            if not any(term in user_input.lower() for term in ['weather', 'temperature', 'forecast', 'rain', 'sunny', 'cloudy', 'wind', 'humidity', 'climate']):
-                enhanced_input = f"Regarding weather information: {user_input}"
+            # If we have weather data, include it in the prompt
+            if weather_prompt:
+                content_parts = [
+                    {"role": "user", "parts": [{"text": weather_system_prompt}]},
+                    {"role": "model", "parts": [{"text": "I understand. I'll be Articuno.AI, your weather assistant."}]},
+                    {"role": "user", "parts": [{"text": f"{user_input}\n\n{weather_prompt}"}]}
+                ]
             else:
-                enhanced_input = user_input
+                # No location detected or weather data available
+                if not any(term in user_input.lower() for term in ['weather', 'temperature', 'forecast', 'rain', 'sunny', 'cloudy', 'wind', 'humidity', 'climate']):
+                    enhanced_input = f"Regarding weather information: {user_input}"
+                else:
+                    enhanced_input = user_input
                 
-            # Add system message through chat format
-            content_parts = [
-                {"role": "user", "parts": [{"text": weather_system_prompt}]},
-                {"role": "model", "parts": [{"text": "I understand. I'll be Articuno.AI, your weather assistant."}]},
-                {"role": "user", "parts": [{"text": enhanced_input}]}
-            ]
+                content_parts = [
+                    {"role": "user", "parts": [{"text": weather_system_prompt}]},
+                    {"role": "model", "parts": [{"text": "I understand. I'll be Articuno.AI, your weather assistant."}]},
+                    {"role": "user", "parts": [{"text": enhanced_input}]}
+                ]
             
             response = model.generate_content(content_parts)
         
@@ -316,6 +495,7 @@ def process_articuno_weather_request(user_input, image_data=None):
     
     except Exception as e:
         print(f"Articuno Weather API error: {str(e)}")
+        traceback.print_exc()  # Print the full stack trace for debugging
         return jsonify({"error": f"Error with Articuno Weather API: {str(e)}"}), 500
 
 def process_gemini_request(user_input, image_data=None):

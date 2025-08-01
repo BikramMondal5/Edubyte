@@ -264,6 +264,31 @@ function initializeUIHandlers() {
     }
 }
 
+// Check if message likely contains a location name
+function mayContainLocation(message) {
+    // Simple check for common location patterns
+    const locationPatterns = [
+        /weather\s+(?:in|at|for)\s+([A-Za-z\s,]+)/i,  // "weather in London"
+        /(?:in|at)\s+([A-Za-z\s,]+?)(?:\s+weather|\?|$)/i,  // "in Paris weather"
+        /^([A-Za-z\s,]+?)(?:\s+weather|\?|$)/i,  // "Tokyo weather"
+        /^([A-Za-z\s,]+?)$/i  // Just a location name
+    ];
+    
+    for (const pattern of locationPatterns) {
+        if (pattern.test(message)) {
+            return true;
+        }
+    }
+    
+    // If message is short and doesn't contain common question words, it might be a location
+    if (message.split(' ').length <= 3 && 
+        !message.match(/what|where|when|why|how|can|could|would|should|is|are|am|will|shall/i)) {
+        return true;
+    }
+    
+    return false;
+}
+
 // Switch the active model/assistant
 function switchActiveModel(name, avatarId) {
     console.log(`Switching to model: ${name} with avatar: ${avatarId}`);
@@ -414,6 +439,15 @@ async function sendMessage() {
 
     // Clear input field and selected image
     chatInput.value = '';
+
+    // Special handling for Articuno.AI when message might contain a location
+    const isArticuno = assistantProfile.name === "Articuno.AI";
+    const mightBeLocation = isArticuno && mayContainLocation(message);
+
+    // Log detection info for debugging
+    if (isArticuno) {
+        console.log(`Message might contain location: ${mightBeLocation ? 'Yes' : 'No'}`);
+    }
 
     // Prepare the request payload
     const payload = { 
