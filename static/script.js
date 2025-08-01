@@ -47,8 +47,8 @@ let userProfile = {
 
 // Set assistant information - will use selected model
 let assistantProfile = {
-    name: "Eubyte",
-    avatar: "edubyte-avatar"
+    name: "Articuno.AI", // Default bot
+    avatar: "Articuno-avatar"
 };
 
 // Bot descriptions (you can expand this with more details)
@@ -248,30 +248,61 @@ function initializeUIHandlers() {
     if (startAnalyzingBtn) {
         startAnalyzingBtn.addEventListener('click', () => {
             startWeatherAnalysis();
+            
+            // After analyzing weather, hide the modal and show the chat interface
+            setTimeout(() => {
+                hideWeatherModal();
+                
+                // Hide showcase and show chat interface
+                document.getElementById('chatbot-showcase').style.display = 'none';
+                chatbotInterface.style.display = 'flex';
+                
+                // Add a welcome message to the chat
+                addAIMessageToHistory(`Hello! I'm Articuno.AI, your weather assistant. I've analyzed the weather for you. How else can I help with weather information?`, chatbotChatHistory);
+            }, 1500);
         });
     }
 }
 
 // Switch the active model/assistant
 function switchActiveModel(name, avatarId) {
+    console.log(`Switching to model: ${name} with avatar: ${avatarId}`);
+    
     // Update assistant profile
     assistantProfile.name = name;
     assistantProfile.avatar = avatarId;
     
-    // Update the chatbot header info
+    // Update the chat input header
+    const chatInputHeader = document.querySelector('.chat-input-header');
+    if (chatInputHeader) {
+        const headerAvatar = chatInputHeader.querySelector('.bot-avatar');
+        const headerName = chatInputHeader.querySelector('.models-name');
+        
+        if (headerAvatar) {
+            headerAvatar.id = avatarId;
+        }
+        
+        if (headerName) {
+            headerName.textContent = name;
+        }
+    }
+    
+    // Update the chatbot header info in interface
     if (chatbotName) {
         chatbotName.textContent = name;
     }
-
-    // Clear chat history for the chatbot interface
-    chatbotChatHistory.innerHTML = '';
-
-    // Hide main grid and show chatbot interface
-    mainGrid.style.display = 'none';
-    chatbotInterface.style.display = 'flex';
-
-    // Display welcome message for the selected model in the chatbot interface
-    addAIMessageToHistory(`Hello! I'm ${name}. How can I help you today?`, chatbotChatHistory);
+    
+    if (document.querySelector('.chatbot-info p')) {
+        const botInfo = botDescriptions[name];
+        if (botInfo) {
+            document.querySelector('.chatbot-info p').textContent = botInfo.description;
+        }
+    }
+    
+    // Update avatar in header
+    if (document.getElementById('chatbot-avatar-display')) {
+        document.getElementById('chatbot-avatar-display').id = avatarId;
+    }
 }
 
 // Show chatbot showcase in main content area
@@ -310,19 +341,29 @@ function showChatbotShowcase(name, avatarId) {
 
 // Start a chat with a specific prompt
 function startChatWithPrompt(prompt = "") {
-    // Clear the main content area
-    contentArea.innerHTML = '';
+    console.log("Starting chat with prompt:", prompt);
     
-    // Add the chat history if it's not already there
-    if (!document.querySelector('.chat-history')) {
-        contentArea.appendChild(chatHistory);
-    }
+    // Hide the main grid and show chatbot interface
+    const mainGrid = document.querySelector('.main-grid-layout');
+    if (mainGrid) mainGrid.style.display = 'none';
+    
+    // Hide showcase if it's visible
+    const chatbotShowcase = document.getElementById('chatbot-showcase');
+    if (chatbotShowcase) chatbotShowcase.style.display = 'none';
+    
+    // Show chatbot interface
+    if (chatbotInterface) chatbotInterface.style.display = 'flex';
     
     // Set the input value to the prompt
-    chatInput.value = prompt;
+    if (chatInput) chatInput.value = prompt;
     
-    // Send the message
-    sendMessage();
+    // Send the message if there's a prompt
+    if (prompt) {
+        sendMessage();
+    } else {
+        // Add welcome message
+        addAIMessageToHistory(`Hello! I'm ${assistantProfile.name}. How can I help you today?`, chatbotChatHistory);
+    }
 }
 
 // Send message function
@@ -332,7 +373,9 @@ async function sendMessage() {
         return; // Don't send empty messages without images
     }
 
-    // If we're still on the main page with grid layout, clear it
+    console.log(`Sending message to ${assistantProfile.name}: ${message}`);
+
+    // If we're still on the main page with grid layout, switch to chat interface
     if (mainGrid.style.display !== 'none') {
         mainGrid.style.display = 'none';
         chatbotInterface.style.display = 'flex';
@@ -367,6 +410,7 @@ async function sendMessage() {
     loadingContainer.appendChild(loadingDiv);
     
     chatbotChatHistory.appendChild(loadingContainer);
+    chatbotChatHistory.scrollTop = chatbotChatHistory.scrollHeight;
 
     // Clear input field and selected image
     chatInput.value = '';
@@ -389,6 +433,8 @@ async function sendMessage() {
     }
 
     try {
+        console.log("Sending request to /api/chat with payload:", payload);
+        
         // Fetch AI response
         const response = await fetch("/api/chat", {
             method: "POST",
@@ -399,17 +445,20 @@ async function sendMessage() {
         });
 
         const data = await response.json();
+        console.log("Received response:", data);
 
         // Remove loading indicator
         chatbotChatHistory.removeChild(loadingContainer);
 
         if (data.error) {
+            console.error("API returned an error:", data.error);
             addAIMessageToHistory("Error: " + data.error, chatbotChatHistory);
         } else {
             // Add AI response to chat
             addAIMessageToHistory(data.response, chatbotChatHistory);
         }
     } catch (error) {
+        console.error("Error communicating with server:", error);
         // Remove loading indicator and show error
         chatbotChatHistory.removeChild(loadingContainer);
         addAIMessageToHistory("Error: Unable to connect to the server. Please try again.", chatbotChatHistory);
@@ -784,7 +833,6 @@ chatInput.addEventListener('keypress', (e) => {
         sendMessage();
     }
 });
-
 
 // Create a hidden file input element for image uploads
 const fileInput = document.createElement('input');
@@ -1184,5 +1232,20 @@ async function startWeatherAnalysis() {
 
 // Initialize UI when the DOM is fully loaded
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('DOM fully loaded - initializing UI handlers');
     initializeUIHandlers();
+    
+    // Enable the chat input by default
+    if (chatInput) {
+        chatInput.disabled = false;
+    }
+    
+    // Make the chat input focusable
+    chatInput.addEventListener('click', () => {
+        // Show the chat interface when clicking on the input
+        if (mainGrid.style.display !== 'none') {
+            // If first time clicking, start with default AI
+            startChatWithPrompt();
+        }
+    });
 });

@@ -265,11 +265,8 @@ def process_articuno_weather_request(user_input, image_data=None):
         When users don't specify a location, politely ask which location they'd like to know about.
         """
         
-        model = genai.GenerativeModel(
-            model_name="gemini-1.5-flash",
-            generation_config=generation_config,
-            system_instruction=weather_system_prompt
-        )
+        # Create the model - fixing the system instruction parameter
+        model = genai.GenerativeModel(model_name="gemini-1.5-flash", generation_config=generation_config)
         
         # Handle messages with images
         if image_data:
@@ -285,8 +282,15 @@ def process_articuno_weather_request(user_input, image_data=None):
                 }
             ]
             
+            # Add system message and create content parts
+            content_parts = [
+                {"role": "user", "parts": [{"text": weather_system_prompt}]},
+                {"role": "model", "parts": [{"text": "I understand. I'll be Articuno.AI, your weather assistant."}]},
+                {"role": "user", "parts": [{"text": user_input}, image_parts[0]]}
+            ]
+            
             # Generate response with both text and image
-            response = model.generate_content([user_input, image_parts[0]])
+            response = model.generate_content(content_parts)
         else:
             # Text-only request
             # Enhance the user query with weather context if needed
@@ -295,7 +299,14 @@ def process_articuno_weather_request(user_input, image_data=None):
             else:
                 enhanced_input = user_input
                 
-            response = model.generate_content(enhanced_input)
+            # Add system message through chat format
+            content_parts = [
+                {"role": "user", "parts": [{"text": weather_system_prompt}]},
+                {"role": "model", "parts": [{"text": "I understand. I'll be Articuno.AI, your weather assistant."}]},
+                {"role": "user", "parts": [{"text": enhanced_input}]}
+            ]
+            
+            response = model.generate_content(content_parts)
         
         # Extract response text
         markdown_output = response.text
