@@ -467,7 +467,12 @@ body {
     height: 110px;
     width: 100%;
     border: 1px solid #2D2D2D;
-    transition: border-color 0.3s ease;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.chat-input-container:focus-within {
+    border-color: #a855f7;
+    box-shadow: 0 0 15px rgba(168, 85, 247, 0.4);
 }
 
 .chat-input-header {
