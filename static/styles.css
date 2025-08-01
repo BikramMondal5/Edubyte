@@ -667,12 +667,18 @@ body {
     font-family: inherit;
     word-spacing: normal;
     letter-spacing: normal;
+    border-radius: 18px;
+    border-bottom-right-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 .ai-message {
     background-color: #2D2D2D;
     color: #f9f9f9;
     margin-right: auto;
+    border-radius: 18px;
+    border-top-left-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 .loading-message {
@@ -884,6 +890,10 @@ body {
     height: 100%;
     width: 100%;
     background-color: #0f0f0f;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+    border: 1px solid #2D2D2D;
 }
 
 .chatbot-header {
@@ -893,6 +903,8 @@ body {
     border-bottom: 1px solid #2D2D2D;
     background-color: #1a1a1a;
     gap: 15px;
+    border-top-left-radius: 16px;
+    border-top-right-radius: 16px;
 }
 
 .chatbot-avatar {

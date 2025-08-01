@@ -256,16 +256,39 @@ function initializeUIHandlers() {
 
 // Check if message likely contains a location name
 function mayContainLocation(message) {
-    // Simple check for common location patterns
+    console.log(`Checking for location in: '${message}'`);
+    
+    // Enhanced check for common location patterns - matched with backend patterns
     const locationPatterns = [
+        // Direct weather queries
         /weather\s+(?:in|at|for)\s+([A-Za-z\s,]+)/i,  // "weather in London"
         /(?:in|at)\s+([A-Za-z\s,]+?)(?:\s+weather|\?|$)/i,  // "in Paris weather"
         /^([A-Za-z\s,]+?)(?:\s+weather|\?|$)/i,  // "Tokyo weather"
-        /^([A-Za-z\s,]+?)$/i  // Just a location name
+        /^([A-Za-z\s,]+?)$/i,  // Just a location name
+        
+        // Weather of/for/in/at location
+        /weather (?:of|for|in|at)\s+([A-Za-z\s,]+)/i,  // "weather of Tokyo"
+        /weather(?:.+?)(?:of|for|in|at)\s+([A-Za-z\s,]+)/i,  // "weather report of London"
+        
+        // Natural language patterns
+        /(?:show|get|tell|give)(?:.+?)weather(?:.+?)(?:of|for|in|at)\s+([A-Za-z\s,]+)/i,  // "give me weather of London"
+        /(?:show|get|tell|give)(?:.+?)(?:of|for|in|at)\s+([A-Za-z\s,]+?)(?:\s+weather|\?|$)/i,  // "give me of London weather"
+        /(?:how is|what is|what's)(?:.+?)weather(?:.+?)(?:of|for|in|at)\s+([A-Za-z\s,]+)/i,  // "how is the weather in London"
+        /(?:how's|what's)(?:.+?)(?:of|for|in|at)\s+([A-Za-z\s,]+?)(?:\s+weather|\?|$)/i,  // "what's in London weather like"
+        
+        // Specific patterns for problem cases
+        /(?:give|show|tell)(?:.+?)(?:weather|forecast|temperature)(?:.+?)(?:of|for|in|at)\s+([A-Za-z\s,]+)/i,  // "give me the weather reports of kolkata"
+        /(?:give|show|tell)(?:.+?)(?:weather|forecast|temperature)(?:.+?)(?:about|in|at|for)\s+([A-Za-z\s,]+)/i,  // "give me weather information about kolkata"
+        /(?:give|show|tell)(?:.+?)(?:weather|forecast|temperature).+?([A-Za-z\s,]+?)(?:\s+to me|\?|$)/i,  // "give me the weather of kolkata"
+        /(?:the|current|today'?s)(?:.+?)(?:weather|forecast|temperature)(?:.+?)(?:of|for|in|at)\s+([A-Za-z\s,]+)/i,  // "the current weather in kolkata"
     ];
     
+    // Try each pattern
     for (const pattern of locationPatterns) {
-        if (pattern.test(message)) {
+        const match = message.match(pattern);
+        if (match) {
+            const location = match[1].trim().replace(/[.,;:!?]+$/, '');
+            console.log(`✓ Found location via pattern: ${location}`);
             return true;
         }
     }
@@ -273,10 +296,44 @@ function mayContainLocation(message) {
     // If message is short and doesn't contain common question words, it might be a location
     if (message.split(' ').length <= 3 && 
         !message.match(/what|where|when|why|how|can|could|would|should|is|are|am|will|shall/i)) {
+        console.log("✓ Short message without question words might be a location");
         return true;
     }
     
+    // Look for capitalized words that might be location names
+    const words = message.split(/\s+/);
+    for (const word of words) {
+        // Clean the word of punctuation
+        const cleanWord = word.replace(/[.,;:!?]+$/, '');
+        // If the word starts with a capital letter and is at least 3 characters, it might be a location
+        if (cleanWord.length >= 3 && 
+            cleanWord[0] === cleanWord[0].toUpperCase() && 
+            cleanWord[0] !== cleanWord[0].toLowerCase() &&
+            !['What', 'Where', 'When', 'Why', 'How', 'Can', 'Could', 'Would', 
+              'Should', 'Will', 'Shall', 'The', 'This', 'That', 'These', 'Those',
+              'Give', 'Show', 'Tell', 'About', 'Weather', 'Forecast', 'Temperature',
+              'Conditions', 'Report', 'Reports', 'Information', 'Data', 'Details'].includes(cleanWord)) {
+            console.log(`✓ Found capitalized word that might be a location: ${cleanWord}`);
+            return true;
+        }
+    }
+    
+    // Last resort - look for any word with capital letters
+    for (const word of words) {
+        const cleanWord = word.replace(/[.,;:!?]+$/, '');
+        if (cleanWord.length >= 3 && any(c => c === c.toUpperCase() && c !== c.toLowerCase(), [...cleanWord])) {
+            console.log(`✓ Last resort: found word with capitals: ${cleanWord}`);
+            return true;
+        }
+    }
+    
+    console.log("✗ No potential location detected");
     return false;
+}
+
+// Helper function to check if any item in an array meets a condition
+function any(condition, array) {
+    return array.some(condition);
 }
 
 // Switch the active model/assistant

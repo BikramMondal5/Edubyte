@@ -302,19 +302,42 @@ def detect_location_from_message(message):
     Returns:
         str or None: Detected location name or None if no location found
     """
-    # Simple location detection - look for common location query patterns
+    # Enhanced location detection - look for common location query patterns
     location_patterns = [
         r"weather\s+(?:in|at|for)\s+([A-Za-z\s,]+)",  # "weather in London"
         r"(?:in|at)\s+([A-Za-z\s,]+?)(?:\s+weather|\?|$)",  # "in Paris weather"
         r"^([A-Za-z\s,]+?)(?:\s+weather|\?|$)",  # "Tokyo weather"
-        r"^([A-Za-z\s,]+?)$"  # Just the location name
+        r"^([A-Za-z\s,]+?)$",  # Just the location name
+        r"weather (?:of|for|in|at)\s+([A-Za-z\s,]+)",  # "weather of Tokyo"
+        r"weather(?:.+?)(?:of|for|in|at)\s+([A-Za-z\s,]+)",  # "weather report of London"
+        r"(?:show|get|tell|give)(?:.+?)weather(?:.+?)(?:of|for|in|at)\s+([A-Za-z\s,]+)",  # "give me weather of London"
+        r"(?:show|get|tell|give)(?:.+?)(?:of|for|in|at)\s+([A-Za-z\s,]+?)(?:\s+weather|\?|$)",  # "give me of London weather"
+        r"(?:how is|what is|what's)(?:.+?)weather(?:.+?)(?:of|for|in|at)\s+([A-Za-z\s,]+)",  # "how is the weather in London"
+        r"(?:how's|what's)(?:.+?)(?:of|for|in|at)\s+([A-Za-z\s,]+?)(?:\s+weather|\?|$)"  # "what's in London weather like"
     ]
     
     for pattern in location_patterns:
         match = re.search(pattern, message, re.IGNORECASE)
         if match:
             location = match.group(1).strip()
+            # Remove trailing punctuation if any
+            location = re.sub(r'[.,;:!?]+$', '', location)
             return location
+    
+    # As a fallback, try to find any city name mentioned in the query
+    # This is a simple approach - in a production system, you might use NER (Named Entity Recognition)
+    words = message.split()
+    for word in words:
+        # Clean the word of punctuation
+        clean_word = re.sub(r'[.,;:!?]+$', '', word)
+        # If the word starts with a capital letter and is at least 3 characters, it might be a location
+        if len(clean_word) >= 3 and clean_word[0].isupper() and clean_word.lower() not in [
+            "what", "where", "when", "why", "how", "can", "could", "would", 
+            "should", "will", "shall", "the", "this", "that", "these", "those",
+            "give", "show", "tell", "about", "weather", "forecast", "temperature",
+            "conditions"
+        ]:
+            return clean_word
     
     return None
 
