@@ -444,7 +444,7 @@ async function sendMessage() {
         profileInfo.appendChild(profileName);
         
         const loadingDiv = document.createElement("div");
-        loadingDiv.innerHTML = "Sending weather report to your email <span class='loading-dots'><span>.</span><span>.</span><span>.</span></span>";
+        loadingDiv.innerHTML = "Sending Kolkata weather report to your registered email...";
         loadingDiv.className = "loading-message";
         
         loadingContainer.appendChild(profileInfo);
