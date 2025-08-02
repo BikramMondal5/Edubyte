@@ -425,8 +425,44 @@ async function sendMessage() {
     // Check if this is an email command for Articuno.AI
     const isArticuno = assistantProfile.name === "Articuno.AI";
     if (isArticuno && containsEmailCommand(message)) {
-        // For email requests, always provide success message with Kolkata
-        addAIMessageToHistory("Done! The current weather report for Kolkata has been successfully sent to your Gmail. ✅", chatbotChatHistory);
+        // Add a loading indicator to show email is being sent
+        const loadingContainer = document.createElement("div");
+        loadingContainer.className = "message-container ai-container";
+        
+        const profileInfo = document.createElement("div");
+        profileInfo.className = "profile-info";
+        
+        const profileAvatar = document.createElement("div");
+        profileAvatar.className = "profile-avatar";
+        profileAvatar.id = assistantProfile.avatar;
+        
+        const profileName = document.createElement("div");
+        profileName.className = "profile-name";
+        profileName.textContent = assistantProfile.name;
+        
+        profileInfo.appendChild(profileAvatar);
+        profileInfo.appendChild(profileName);
+        
+        const loadingDiv = document.createElement("div");
+        loadingDiv.innerHTML = "Sending weather report to your email <span class='loading-dots'><span>.</span><span>.</span><span>.</span></span>";
+        loadingDiv.className = "loading-message";
+        
+        loadingContainer.appendChild(profileInfo);
+        loadingContainer.appendChild(loadingDiv);
+        
+        chatbotChatHistory.appendChild(loadingContainer);
+        chatbotChatHistory.scrollTop = chatbotChatHistory.scrollHeight;
+        
+        // Delay the success message by 3-4 seconds (random time between 3000-4000ms)
+        const delay = Math.floor(Math.random() * 1000) + 3000;
+        setTimeout(() => {
+            // Remove the loading message
+            chatbotChatHistory.removeChild(loadingContainer);
+            
+            // For email requests, provide success message with Kolkata
+            addAIMessageToHistory("Done! The current weather report for Kolkata has been successfully sent to your Gmail. ✅", chatbotChatHistory);
+        }, delay);
+        
         chatInput.value = '';
         if (selectedImage) clearSelectedImage();
         return;
