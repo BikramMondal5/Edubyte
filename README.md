@@ -1,7 +1,7 @@
-## 🤖🪄 Edubyte - "Interact. Innovate. Inspire with AI"
+## 🤖🪄 Articuno.AI v1.0 - "Interact. Innovate. Inspire with AI"
 
-![Edubyte Interface](./static/icons/screenshot.png)
-Edubyte is an AI powered platform where user can interact with different generative AI including advanced LLMs GPT-40, DeepSeek, Gemini 2.0 Flash, Mistral AI and many more. 
+![Articuno.AI Landing Page](./static/icons/Landing-page.png)
+Articuno is an AI powered platform where user can interact with different generative AI including advanced LLMs GPT-40, DeepSeek, Gemini 2.0 Flash, Mistral AI and many more. 
 
 ## 🌟 Features 
 - 🧠 Interact with Advanced LLMs like GPT-40, DeepSeek, Gemini 2.0 Flash, Mistral AI, and more.
@@ -28,7 +28,7 @@ Edubyte is an AI powered platform where user can interact with different generat
   
 - **Gemini 2.0 Flash:** A lightweight, fast-response LLM developed by Google.⚡
   
-- **Edubyte:** A friendly chatAssistant for instant answer to your daily queries. 🚀
+- **Articuno.AI:** A friendly chatAssistant for instant answer to your daily queries. 🚀
 
 - **Spoiler Alert:** More interactive AI models are coming soon! ☢️
 
@@ -36,12 +36,12 @@ Edubyte is an AI powered platform where user can interact with different generat
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/BikramMondal5/Edubyte.git
+git clone https://github.com/BikramMondal5/Articuno.AI.git
 ```
 
 2. Navigate to the project directory:
 ```bash
-cd Edubyte
+cd Articuno.AI
 ```
 
 3. Install dependencies
