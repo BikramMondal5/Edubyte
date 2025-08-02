@@ -503,5 +503,34 @@
     </div>
 
     <script src="{{ url_for('static',filename='script.js') }}"></script>
+    
+    <!-- Inline script to ensure the location button works correctly -->
+    <script>
+        // Direct handler for the location button
+        document.addEventListener('DOMContentLoaded', function() {
+            const locationButton = document.getElementById('use-location-btn');
+            if (locationButton) {
+                console.log('Adding direct inline handler to location button');
+                
+                // Remove any existing listeners first
+                const newLocationButton = locationButton.cloneNode(true);
+                locationButton.parentNode.replaceChild(newLocationButton, locationButton);
+                
+                // Add a fresh click handler
+                newLocationButton.addEventListener('click', function(event) {
+                    event.preventDefault();
+                    console.log('Location button clicked from inline script');
+                    
+                    // Call the useCurrentLocation function from the main script
+                    if (typeof useCurrentLocation === 'function') {
+                        useCurrentLocation();
+                    } else {
+                        console.error('useCurrentLocation function not found');
+                        alert('Error: Could not access location services. Please try again or enter location manually.');
+                    }
+                });
+            }
+        });
+    </script>
 </body>
 </html>

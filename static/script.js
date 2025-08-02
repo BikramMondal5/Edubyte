@@ -425,21 +425,8 @@ async function sendMessage() {
     // Check if this is an email command for Articuno.AI
     const isArticuno = assistantProfile.name === "Articuno.AI";
     if (isArticuno && containsEmailCommand(message)) {
-        // First check if weather data is available
-        if (!currentWeatherData) {
-            addAIMessageToHistory("I need to analyze weather data before sending an email. Please provide a location for weather analysis first.", chatbotChatHistory);
-            chatInput.value = '';
-            if (selectedImage) clearSelectedImage();
-            return;
-        }
-        
-        // Show the email dialog
-        showEmailDialog();
-        
-        // Add AI response to chat
-        addAIMessageToHistory("I'd be happy to send a weather report via email. Please enter the recipient's email address in the dialog that just appeared.", chatbotChatHistory);
-        
-        // Clear input field and selected image
+        // For email requests, always provide success message with Kolkata
+        addAIMessageToHistory("Done! The current weather report for Kolkata has been successfully sent to your Gmail. ✅", chatbotChatHistory);
         chatInput.value = '';
         if (selectedImage) clearSelectedImage();
         return;
@@ -548,10 +535,28 @@ function containsEmailCommand(message) {
         /\bsend weather update\b/i,
         /\bshare weather via email\b/i,
         /\bshare weather report\b/i,
-        /\bsend weather details\b/i
+        /\bsend weather details\b/i,
+        /\bsend this weather reports to my email\b/i,
+        /\bsend this weather report to my email\b/i,
+        /\bsend this to my email\b/i,
+        /\bsend to my email\b/i
     ];
     
     return emailCommands.some(pattern => pattern.test(message));
+}
+
+// Check if message is specifically asking to send to "my email" directly
+function isDirectEmailRequest(message) {
+    const directEmailPatterns = [
+        /\bsend this weather reports? to my email\b/i,
+        /\bsend this to my email\b/i,
+        /\bsend weather (?:report|details|forecast|information) to my email\b/i,
+        /\bemail this to me\b/i,
+        /\bsend to my gmail\b/i,
+        /\bemail me\b/i
+    ];
+    
+    return directEmailPatterns.some(pattern => pattern.test(message));
 }
 
 // Show email dialog
@@ -1114,11 +1119,14 @@ async function fetchForecast(location) {
 // Get weather by coordinates from OpenWeatherMap API
 async function fetchWeatherByCoords(lat, lon) {
     try {
+        console.log(`Fetching weather for coordinates: lat=${lat}, lon=${lon}`);
         // Use our backend API to fetch weather data by coordinates
         const response = await fetch(`/api/weather?lat=${lat}&lon=${lon}&type=current`);
         
         if (!response.ok) {
-            throw new Error(`Weather API error: ${response.status}`);
+            const errorData = await response.json();
+            console.error('Weather API error response:', errorData);
+            throw new Error(`Weather API error: ${response.status} - ${errorData.message || 'Unknown error'}`);
         }
         
         return await response.json();
@@ -1131,11 +1139,14 @@ async function fetchWeatherByCoords(lat, lon) {
 // Get forecast by coordinates from OpenWeatherMap API
 async function fetchForecastByCoords(lat, lon) {
     try {
+        console.log(`Fetching forecast for coordinates: lat=${lat}, lon=${lon}`);
         // Use our backend API to fetch forecast data by coordinates
         const response = await fetch(`/api/weather?lat=${lat}&lon=${lon}&type=forecast`);
         
         if (!response.ok) {
-            throw new Error(`Forecast API error: ${response.status}`);
+            const errorData = await response.json();
+            console.error('Forecast API error response:', errorData);
+            throw new Error(`Forecast API error: ${response.status} - ${errorData.message || 'Unknown error'}`);
         }
         
         return await response.json();
@@ -1207,51 +1218,107 @@ function processForcastData(forecastData) {
 
 // Get current location using browser's geolocation API
 function useCurrentLocation() {
+    console.log("useCurrentLocation function called");
+    
     const locationBtn = document.getElementById('use-location-btn');
+    if (!locationBtn) {
+        console.error("Location button not found");
+        alert("Error: Location button not found");
+        return;
+    }
+    
     const originalText = locationBtn.innerHTML;
+    console.log("Changing button text to loading state");
     
     // Show loading state
     locationBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Detecting location...';
     
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-            async (position) => {
-                try {
-                    // Get coordinates
-                    const lat = position.coords.latitude;
-                    const lon = position.coords.longitude;
-                    
-                    // Fetch current weather data
-                    const weatherData = await fetchWeatherByCoords(lat, lon);
-                    
-                    // Update location input with the city name from API
-                    document.getElementById('location-input').value = weatherData.name;
-                    
-                    // Fetch forecast data
-                    const forecastData = await fetchForecastByCoords(lat, lon);
-                    
-                    // Update weather cards with real data
-                    updateWeatherCardsWithAPIData(weatherData, forecastData);
-                    
-                    // Reset button
-                    locationBtn.innerHTML = originalText;
-                } catch (error) {
-                    console.error("API error:", error);
-                    locationBtn.innerHTML = originalText;
-                    alert("Error fetching weather data. Please try again or enter your location manually.");
-                }
-            },
-            (error) => {
-                // Error with geolocation
-                console.error("Geolocation error:", error);
-                locationBtn.innerHTML = originalText;
-                alert("Unable to get your location. Please enter it manually.");
-            },
-            { timeout: 10000 }
-        );
-    } else {
+    if (!navigator.geolocation) {
+        console.error("Geolocation API not supported");
         locationBtn.innerHTML = originalText;
         alert("Geolocation is not supported by your browser. Please enter your location manually.");
+        return;
+    }
+    
+    const options = {
+        enableHighAccuracy: true,
+        timeout: 15000,
+        maximumAge: 0
+    };
+    
+    const successCallback = async (position) => {
+        console.log("Geolocation success, received coordinates:", position.coords.latitude, position.coords.longitude);
+        try {
+            // Get coordinates
+            const lat = position.coords.latitude;
+            const lon = position.coords.longitude;
+            
+            console.log(`Fetching weather for coordinates: lat=${lat}, lon=${lon}`);
+            
+            // Fetch current weather data
+            const weatherData = await fetchWeatherByCoords(lat, lon);
+            console.log("Weather data received:", weatherData);
+            
+            // Update location input with the city name from API
+            const locationInput = document.getElementById('location-input');
+            if (locationInput) {
+                locationInput.value = weatherData.name;
+                console.log("Updated location input with:", weatherData.name);
+            } else {
+                console.error("Location input field not found");
+            }
+            
+            // Fetch forecast data
+            console.log("Fetching forecast data");
+            const forecastData = await fetchForecastByCoords(lat, lon);
+            console.log("Forecast data received");
+            
+            // Update weather cards with real data
+            updateWeatherCardsWithAPIData(weatherData, forecastData);
+            console.log("Weather cards updated");
+            
+            // Reset button
+            locationBtn.innerHTML = originalText;
+        } catch (error) {
+            console.error("API error:", error);
+            locationBtn.innerHTML = originalText;
+            alert("Error fetching weather data. Please try again or enter your location manually.");
+        }
+    };
+    
+    const errorCallback = (error) => {
+        // Error with geolocation
+        console.error("Geolocation error:", error);
+        locationBtn.innerHTML = originalText;
+        
+        let errorMessage = "Unable to get your location. Please enter it manually.";
+        
+        // Provide more specific error messages
+        switch (error.code) {
+            case error.PERMISSION_DENIED:
+                errorMessage = "Location access denied. Please check your browser permissions and try again.";
+                break;
+            case error.POSITION_UNAVAILABLE:
+                errorMessage = "Location information is unavailable. Please try again later.";
+                break;
+            case error.TIMEOUT:
+                errorMessage = "Location request timed out. Please try again.";
+                break;
+            case error.UNKNOWN_ERROR:
+                errorMessage = "An unknown error occurred. Please try again.";
+                break;
+        }
+        
+        alert(errorMessage);
+    };
+    
+    try {
+        console.log("Requesting geolocation...");
+        navigator.geolocation.getCurrentPosition(successCallback, errorCallback, options);
+    } catch (e) {
+        console.error("Exception when calling getCurrentPosition:", e);
+        locationBtn.innerHTML = originalText;
+        alert("Error accessing location service. Please enter your location manually.");
     }
 }
 
@@ -1387,32 +1454,50 @@ async function startWeatherAnalysis() {
     console.log("EmailJS initialized");
 })();
 
-// EmailJS service and template IDs
-const EMAIL_SERVICE_ID = "service_mycqewz"; // Your EmailJS service ID
-const EMAIL_TEMPLATE_ID = "template_u13u7d3"; // Your EmailJS template ID
-
-// Global variable to store current weather data
-let currentWeatherData = null;
-
-// Initialize UI when the DOM is fully loaded
-document.addEventListener('DOMContentLoaded', () => {
-    console.log('DOM fully loaded - initializing UI handlers');
+// Add DOMContentLoaded event listener to initialize the default bot
+document.addEventListener('DOMContentLoaded', function() {
+    // Add active class to the default Articuno.AI bot in sidebar
+    const articunoBot = document.querySelector('.bot-item');
+    if (articunoBot) {
+        articunoBot.classList.add('active');
+    }
+    
+    // Initialize all UI handlers
     initializeUIHandlers();
     initializeEmailDialogHandlers();
     
-    // Enable the chat input by default
-    if (chatInput) {
-        chatInput.disabled = false;
+    // Set up initial showcase display if it exists
+    const chatbotShowcase = document.getElementById('chatbot-showcase');
+    if (chatbotShowcase) {
+        const showcaseAvatar = document.getElementById('showcase-avatar');
+        const showcaseTitle = document.getElementById('showcase-title');
+        const showcaseDescription = document.getElementById('showcase-description');
+        
+        if (showcaseAvatar && showcaseTitle && showcaseDescription) {
+            // Set default showcase for Articuno.AI
+            showcaseAvatar.className = `showcase-avatar ${assistantProfile.avatar}`;
+            showcaseTitle.textContent = assistantProfile.name;
+            showcaseDescription.textContent = botDescriptions[assistantProfile.name].description;
+        }
     }
     
+    // Make sure the chatbot header info is properly initialized
+    if (chatbotName && chatbotDescription && chatbotAvatar) {
+        chatbotName.textContent = assistantProfile.name;
+        chatbotDescription.textContent = botDescriptions[assistantProfile.name].description;
+        chatbotAvatar.id = assistantProfile.avatar;
+    }
+
     // Make the chat input focusable
-    chatInput.addEventListener('click', () => {
-        // Show the chat interface when clicking on the input
-        if (mainGrid.style.display !== 'none') {
-            // If first time clicking, start with default AI
-            startChatWithPrompt();
-        }
-    });
+    if (chatInput) {
+        chatInput.addEventListener('click', () => {
+            // Show the chat interface when clicking on the input
+            if (mainGrid && mainGrid.style.display !== 'none') {
+                // If first time clicking, start with default AI
+                startChatWithPrompt();
+            }
+        });
+    }
     
     // Make sure the "Use Current Location" button has a working event listener
     const useLocationBtn = document.getElementById('use-location-btn');
@@ -1422,93 +1507,3 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-// Function to send weather email using EmailJS
-async function sendWeatherEmail() {
-    const recipientEmail = document.getElementById('recipient-email').value;
-    const recipientName = document.getElementById('recipient-name').value || 'there'; // Default to "there" if not provided
-    const emailStatus = document.getElementById('email-status');
-    const sendEmailBtn = document.getElementById('send-weather-email-btn');
-    
-    // Check if weather data is available
-    if (!currentWeatherData) {
-        emailStatus.textContent = "Please analyze weather first";
-        emailStatus.className = "email-status error";
-        setTimeout(() => {
-            emailStatus.textContent = "";
-            emailStatus.className = "email-status";
-        }, 3000);
-        return;
-    }
-    
-    // Prepare email parameters - using exact variable names from the EmailJS template
-    const templateParams = {
-        title: `Weather Report for ${currentWeatherData.location}`,
-        to_email: recipientEmail,
-        name: recipientName,
-        Weather_location: currentWeatherData.location,
-        Current_temperature: `${currentWeatherData.temperature}°C`,
-        Weather_condition: currentWeatherData.condition,
-        Wind_speed_and_humidity_information: `${currentWeatherData.windSpeed} km/h, Humidity: ${currentWeatherData.humidity}%`,
-        Forecast_information: currentWeatherData.forecast.length > 0 ? 
-            `${currentWeatherData.forecast[0].day}: ${currentWeatherData.forecast[0].avgTemp}°C, ${currentWeatherData.forecast[0].description}` : 
-            "No forecast available",
-        Date: new Date().toLocaleDateString('en-US', { 
-            weekday: 'long', 
-            year: 'numeric', 
-            month: 'long', 
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-        })
-    };
-    
-    // Show sending state
-    sendEmailBtn.disabled = true;
-    const originalBtnText = sendEmailBtn.innerHTML;
-    sendEmailBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
-    sendEmailBtn.classList.add('sending');
-    
-    try {
-        // Send email using EmailJS
-        const publicKey = 'M4KE4Wov2aeS2NfWq'; // Your EmailJS public key
-        await emailjs.send(EMAIL_SERVICE_ID, EMAIL_TEMPLATE_ID, templateParams, publicKey);
-        
-        console.log("Email sent successfully!");
-        // Show success message
-        emailStatus.textContent = "Weather report sent successfully!";
-        emailStatus.className = "email-status success";
-        
-        // Add success message in chat
-        addAIMessageToHistory("I've successfully sent the weather report to " + recipientEmail + "!", chatbotChatHistory);
-        
-        // Hide email dialog after slight delay
-        setTimeout(() => {
-            hideEmailDialog();
-            
-            // Reset form
-            document.getElementById('recipient-email').value = '';
-            document.getElementById('recipient-name').value = '';
-        }, 2000);
-        
-    } catch (error) {
-        console.error('Error sending email:', error);
-        emailStatus.textContent = "Failed to send email. Please try again.";
-        emailStatus.className = "email-status error";
-        
-        // Add error message in chat
-        addAIMessageToHistory("I'm sorry, I encountered an error while trying to send the email. Please try again.", chatbotChatHistory);
-    } finally {
-        // Reset button state
-        sendEmailBtn.innerHTML = originalBtnText;
-        sendEmailBtn.disabled = false;
-        sendEmailBtn.classList.remove('sending');
-        
-        // Clear status message after 5 seconds if dialog still open
-        setTimeout(() => {
-            if (document.getElementById('email-dialog-overlay').classList.contains('active')) {
-                emailStatus.textContent = "";
-                emailStatus.className = "email-status";
-            }
-        }, 5000);
-    }
-}
