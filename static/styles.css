@@ -689,18 +689,47 @@ body {
 .loading-message {
     align-self: flex-start;
     font-style: italic;
-    color: #CCC;
     margin: 8px 0;
-    padding: 8px 12px;
-    background-color: #2D2D2D;
+    padding: 12px 16px;
+    background-color: transparent;
     border-radius: 12px;
-    animation: pulse 1.5s infinite;
 }
 
-@keyframes pulse {
-    0% { opacity: 0.6; }
-    50% { opacity: 1; }
-    100% { opacity: 0.6; }
+/* Loading dots animation */
+.loading-dots {
+    display: inline-flex;
+    align-items: center;
+    height: 20px;
+}
+
+.loading-dots span {
+    width: 8px;
+    height: 8px;
+    margin: 0 3px;
+    border-radius: 50%;
+    display: inline-block;
+    background: #3B82F6;
+    /* Removed box-shadow to eliminate the sub-dots effect */
+    animation: shm-dots 1.4s infinite ease-in-out both;
+}
+
+.loading-dots span:nth-child(1) {
+    animation-delay: -0.32s;
+}
+
+.loading-dots span:nth-child(2) {
+    animation-delay: -0.16s;
+}
+
+@keyframes shm-dots {
+    0%, 100% { 
+        transform: translateY(0) scale(0.6);
+        opacity: 0.6;
+    }
+    50% { 
+        transform: translateY(-10px) scale(1);
+        opacity: 1;
+    }
 }
 
 /* Animation for messages */
@@ -1346,4 +1375,262 @@ body {
     100% {
         opacity: 0.7;
     }
+}
+
+/* Weather Email Form Styles */
+.weather-email-section {
+    background: rgba(35, 35, 35, 0.6);
+    backdrop-filter: blur(10px);
+    border-radius: 16px;
+    border: 1px solid rgba(168, 85, 247, 0.2);
+    padding: 20px;
+    margin-bottom: 28px;
+}
+
+.weather-email-header {
+    text-align: center;
+    margin-bottom: 16px;
+}
+
+.weather-email-header h3 {
+    font-size: 18px;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.weather-email-header h3 i {
+    color: #a855f7;
+}
+
+.weather-email-header p {
+    color: #a0a0a0;
+    font-size: 14px;
+}
+
+.weather-email-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.email-input-container {
+    position: relative;
+}
+
+.email-input-container input {
+    width: 100%;
+    background: rgba(45, 45, 45, 0.6);
+    border: 1px solid rgba(168, 85, 247, 0.3);
+    border-radius: 12px;
+    padding: 12px 12px 12px 40px;
+    color: white;
+    font-size: 15px;
+    transition: all 0.3s;
+}
+
+.email-input-container input:focus {
+    outline: none;
+    border-color: #a855f7;
+    box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.25);
+}
+
+.email-input-container input::placeholder {
+    color: #8f8f8f;
+}
+
+.email-icon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #a855f7;
+}
+
+.send-weather-email-btn {
+    background: linear-gradient(135deg, #7e22ce, #a855f7);
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    margin-top: 16px;
+}
+
+.send-weather-email-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(168, 85, 247, 0.3);
+}
+
+.send-weather-email-btn:disabled {
+    background: #444;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+.email-status {
+    text-align: center;
+    font-size: 14px;
+    min-height: 20px;
+    margin-top: 16px;
+}
+
+.email-status.success {
+    color: #10b981;
+}
+
+.email-status.error {
+    color: #ef4444;
+}
+
+/* Animation for the send button */
+@keyframes sending {
+    0% { transform: scale(1); }
+    50% { transform: scale(0.95); }
+    100% { transform: scale(1); }
+}
+
+.sending {
+    animation: sending 1s infinite;
+    pointer-events: none;
+}
+
+/* Email Dialog Overlay Styles */
+.email-dialog-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.75);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.email-dialog-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.email-dialog {
+    background: var(--background-dark);
+    backdrop-filter: blur(12px);
+    border-radius: 20px;
+    width: 90%;
+    max-width: 500px;
+    padding: 28px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    position: relative;
+    border: 1px solid rgba(168, 85, 247, 0.3);
+    transform: translateY(20px);
+    transition: transform 0.3s ease;
+}
+
+.email-dialog-overlay.active .email-dialog {
+    transform: translateY(0);
+}
+
+.email-input-container {
+    position: relative;
+    margin-bottom: 16px;
+}
+
+.email-input-container input {
+    width: 100%;
+    background: rgba(45, 45, 45, 0.6);
+    border: 1px solid rgba(168, 85, 247, 0.3);
+    border-radius: 12px;
+    padding: 12px 12px 12px 40px;
+    color: white;
+    font-size: 15px;
+    transition: all 0.3s;
+}
+
+.email-input-container input:focus {
+    outline: none;
+    border-color: #a855f7;
+    box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.25);
+}
+
+.email-input-container input::placeholder {
+    color: #8f8f8f;
+}
+
+.email-icon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #a855f7;
+}
+
+.send-weather-email-btn {
+    background: linear-gradient(135deg, #7e22ce, #a855f7);
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    margin-top: 16px;
+}
+
+.send-weather-email-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(168, 85, 247, 0.3);
+}
+
+.send-weather-email-btn:disabled {
+    background: #444;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+.email-status {
+    text-align: center;
+    font-size: 14px;
+    min-height: 20px;
+    margin-top: 16px;
+}
+
+.email-status.success {
+    color: #10b981;
+}
+
+.email-status.error {
+    color: #ef4444;
+}
+
+/* Animation for the send button */
+@keyframes sending {
+    0% { transform: scale(1); }
+    50% { transform: scale(0.95); }
+    100% { transform: scale(1); }
+}
+
+.sending {
+    animation: sending 1s infinite;
+    pointer-events: none;
 }

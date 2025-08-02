@@ -422,6 +422,29 @@ async function sendMessage() {
     // Add user message to chat - make sure we're using the chatbot interface chat history
     addMessageToHistory(message, true, selectedImage, chatbotChatHistory);
 
+    // Check if this is an email command for Articuno.AI
+    const isArticuno = assistantProfile.name === "Articuno.AI";
+    if (isArticuno && containsEmailCommand(message)) {
+        // First check if weather data is available
+        if (!currentWeatherData) {
+            addAIMessageToHistory("I need to analyze weather data before sending an email. Please provide a location for weather analysis first.", chatbotChatHistory);
+            chatInput.value = '';
+            if (selectedImage) clearSelectedImage();
+            return;
+        }
+        
+        // Show the email dialog
+        showEmailDialog();
+        
+        // Add AI response to chat
+        addAIMessageToHistory("I'd be happy to send a weather report via email. Please enter the recipient's email address in the dialog that just appeared.", chatbotChatHistory);
+        
+        // Clear input field and selected image
+        chatInput.value = '';
+        if (selectedImage) clearSelectedImage();
+        return;
+    }
+
     // Show loading indicator
     const loadingContainer = document.createElement("div");
     loadingContainer.className = "message-container ai-container";
@@ -441,7 +464,8 @@ async function sendMessage() {
     profileInfo.appendChild(profileName);
     
     const loadingDiv = document.createElement("div");
-    loadingDiv.textContent = "Thinking...";
+    // Replace "Thinking..." with a three dots animation
+    loadingDiv.innerHTML = "<span class='loading-dots'><span>.</span><span>.</span><span>.</span></span>";
     loadingDiv.className = "loading-message";
     
     loadingContainer.appendChild(profileInfo);
@@ -454,7 +478,6 @@ async function sendMessage() {
     chatInput.value = '';
 
     // Special handling for Articuno.AI when message might contain a location
-    const isArticuno = assistantProfile.name === "Articuno.AI";
     const mightBeLocation = isArticuno && mayContainLocation(message);
 
     // Log detection info for debugging
@@ -509,6 +532,72 @@ async function sendMessage() {
         // Remove loading indicator and show error
         chatbotChatHistory.removeChild(loadingContainer);
         addAIMessageToHistory("Error: Unable to connect to the server. Please try again.", chatbotChatHistory);
+    }
+}
+
+// Check if message contains email-related commands
+function containsEmailCommand(message) {
+    const emailCommands = [
+        /\bemail\b/i,
+        /\bsend email\b/i,
+        /\bsend a weather report\b/i,
+        /\bsend weather report\b/i,
+        /\bsend a report\b/i,
+        /\bemail weather\b/i,
+        /\bmail weather\b/i,
+        /\bsend weather update\b/i,
+        /\bshare weather via email\b/i,
+        /\bshare weather report\b/i,
+        /\bsend weather details\b/i
+    ];
+    
+    return emailCommands.some(pattern => pattern.test(message));
+}
+
+// Show email dialog
+function showEmailDialog() {
+    const emailDialog = document.getElementById('email-dialog-overlay');
+    if (emailDialog) {
+        emailDialog.classList.add('active');
+        
+        // Focus on the email input
+        setTimeout(() => {
+            const emailInput = document.getElementById('recipient-email');
+            if (emailInput) {
+                emailInput.focus();
+            }
+        }, 300);
+    }
+}
+
+// Hide email dialog
+function hideEmailDialog() {
+    const emailDialog = document.getElementById('email-dialog-overlay');
+    if (emailDialog) {
+        emailDialog.classList.remove('active');
+    }
+}
+
+// Initialize event handlers for email dialog
+function initializeEmailDialogHandlers() {
+    const emailDialogCloseBtn = document.getElementById('email-dialog-close-btn');
+    if (emailDialogCloseBtn) {
+        emailDialogCloseBtn.addEventListener('click', hideEmailDialog);
+    }
+    
+    // Email form validation
+    const recipientEmail = document.getElementById('recipient-email');
+    const sendEmailBtn = document.getElementById('send-weather-email-btn');
+    
+    if (recipientEmail && sendEmailBtn) {
+        // Enable/disable send button based on email validity
+        recipientEmail.addEventListener('input', () => {
+            const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            sendEmailBtn.disabled = !emailPattern.test(recipientEmail.value);
+        });
+        
+        // Add click event for send email button
+        sendEmailBtn.addEventListener('click', sendWeatherEmail);
     }
 }
 
@@ -1257,6 +1346,16 @@ async function startWeatherAnalysis() {
         const weatherData = await fetchCurrentWeather(location);
         const forecastData = await fetchForecast(location);
         
+        // Store the current weather data for email use
+        currentWeatherData = {
+            location: location,
+            temperature: Math.round(weatherData.main.temp),
+            condition: weatherData.weather[0].description,
+            windSpeed: Math.round(weatherData.wind.speed * 3.6),
+            humidity: weatherData.main.humidity,
+            forecast: processForcastData(forecastData)
+        };
+        
         // Update the weather cards with the API data
         updateWeatherCardsWithAPIData(weatherData, forecastData);
         
@@ -1281,10 +1380,25 @@ async function startWeatherAnalysis() {
     }
 }
 
+// Add EmailJS initialization
+(function() {
+    // Replace "YOUR_PUBLIC_KEY" in the HTML file with your actual EmailJS public key
+    // This is initialized in the HTML file
+    console.log("EmailJS initialized");
+})();
+
+// EmailJS service and template IDs
+const EMAIL_SERVICE_ID = "service_mycqewz"; // Your EmailJS service ID
+const EMAIL_TEMPLATE_ID = "template_u13u7d3"; // Your EmailJS template ID
+
+// Global variable to store current weather data
+let currentWeatherData = null;
+
 // Initialize UI when the DOM is fully loaded
 document.addEventListener('DOMContentLoaded', () => {
     console.log('DOM fully loaded - initializing UI handlers');
     initializeUIHandlers();
+    initializeEmailDialogHandlers();
     
     // Enable the chat input by default
     if (chatInput) {
@@ -1307,3 +1421,94 @@ document.addEventListener('DOMContentLoaded', () => {
         useLocationBtn.addEventListener('click', useCurrentLocation);
     }
 });
+
+// Function to send weather email using EmailJS
+async function sendWeatherEmail() {
+    const recipientEmail = document.getElementById('recipient-email').value;
+    const recipientName = document.getElementById('recipient-name').value || 'there'; // Default to "there" if not provided
+    const emailStatus = document.getElementById('email-status');
+    const sendEmailBtn = document.getElementById('send-weather-email-btn');
+    
+    // Check if weather data is available
+    if (!currentWeatherData) {
+        emailStatus.textContent = "Please analyze weather first";
+        emailStatus.className = "email-status error";
+        setTimeout(() => {
+            emailStatus.textContent = "";
+            emailStatus.className = "email-status";
+        }, 3000);
+        return;
+    }
+    
+    // Prepare email parameters - using exact variable names from the EmailJS template
+    const templateParams = {
+        title: `Weather Report for ${currentWeatherData.location}`,
+        to_email: recipientEmail,
+        name: recipientName,
+        Weather_location: currentWeatherData.location,
+        Current_temperature: `${currentWeatherData.temperature}°C`,
+        Weather_condition: currentWeatherData.condition,
+        Wind_speed_and_humidity_information: `${currentWeatherData.windSpeed} km/h, Humidity: ${currentWeatherData.humidity}%`,
+        Forecast_information: currentWeatherData.forecast.length > 0 ? 
+            `${currentWeatherData.forecast[0].day}: ${currentWeatherData.forecast[0].avgTemp}°C, ${currentWeatherData.forecast[0].description}` : 
+            "No forecast available",
+        Date: new Date().toLocaleDateString('en-US', { 
+            weekday: 'long', 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        })
+    };
+    
+    // Show sending state
+    sendEmailBtn.disabled = true;
+    const originalBtnText = sendEmailBtn.innerHTML;
+    sendEmailBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+    sendEmailBtn.classList.add('sending');
+    
+    try {
+        // Send email using EmailJS
+        const publicKey = 'M4KE4Wov2aeS2NfWq'; // Your EmailJS public key
+        await emailjs.send(EMAIL_SERVICE_ID, EMAIL_TEMPLATE_ID, templateParams, publicKey);
+        
+        console.log("Email sent successfully!");
+        // Show success message
+        emailStatus.textContent = "Weather report sent successfully!";
+        emailStatus.className = "email-status success";
+        
+        // Add success message in chat
+        addAIMessageToHistory("I've successfully sent the weather report to " + recipientEmail + "!", chatbotChatHistory);
+        
+        // Hide email dialog after slight delay
+        setTimeout(() => {
+            hideEmailDialog();
+            
+            // Reset form
+            document.getElementById('recipient-email').value = '';
+            document.getElementById('recipient-name').value = '';
+        }, 2000);
+        
+    } catch (error) {
+        console.error('Error sending email:', error);
+        emailStatus.textContent = "Failed to send email. Please try again.";
+        emailStatus.className = "email-status error";
+        
+        // Add error message in chat
+        addAIMessageToHistory("I'm sorry, I encountered an error while trying to send the email. Please try again.", chatbotChatHistory);
+    } finally {
+        // Reset button state
+        sendEmailBtn.innerHTML = originalBtnText;
+        sendEmailBtn.disabled = false;
+        sendEmailBtn.classList.remove('sending');
+        
+        // Clear status message after 5 seconds if dialog still open
+        setTimeout(() => {
+            if (document.getElementById('email-dialog-overlay').classList.contains('active')) {
+                emailStatus.textContent = "";
+                emailStatus.className = "email-status";
+            }
+        }, 5000);
+    }
+}
