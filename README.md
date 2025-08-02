@@ -1,34 +1,43 @@
 ## 🤖🪄 Articuno.AI v1.0 - "Interact. Innovate. Inspire with AI"
 
 ![Articuno.AI Landing Page](./static/icons/Landing-page.png)
-Articuno is an AI powered platform where user can interact with different generative AI including advanced LLMs GPT-40, DeepSeek, Gemini 2.0 Flash, Mistral AI and many more. 
+Articuno.AI is an intelligent weather agent that provides real-time weather updates, daily forecasts, and emergency alerts — all powered by the OpenWeatherMap API. It integrates seamlessly with Gmail and Slack to deliver weather reports exactly when and where you need them. Beyond weather, users can also interact with different generative AI including advanced LLMs GPT-40, DeepSeek, Gemini 2.0 Flash, Mistral AI and many more.
 
 ## 🌟 Features 
-- 🧠 Interact with Advanced LLMs like GPT-40, DeepSeek, Gemini 2.0 Flash, Mistral AI, and more.
+- 🌦️ **Intelligent Weather Agent** - Get real-time weather updates, forecasts, and emergency alerts powered by OpenWeatherMap API.
 
-- 🔗 Supports GitHub PAT Integration for seamless model access.
+- 📧 **Seamless Integrations** - Works with Gmail and Slack to deliver weather reports exactly when and where you need them.
 
-- 🧩 Basic AI models included to boost productivity.
+- 📞 **Emergency Alerts** - With Twilio integration, Articuno.AI can call you with a recorded voice alert during severe weather, ensuring you're always prepared.
 
-- 🚀 User-friendly UI with modern dark theme and an intuitive design.
+- 🧠 **Advanced AI Models** - Interact with various LLMs like GPT-40, DeepSeek, Gemini 2.0 Flash, Mistral AI, and more.
 
-- 🪶 Flexible and lightweight website developed by flask.
+- 🔗 **GitHub PAT Integration** - Seamless model access through GitHub Personal Access Tokens.
+
+- 🧩 **Basic AI models** - Included to boost productivity.
+
+- 🚀 **User-friendly UI** - Modern dark theme with an intuitive design.
+
+- 🪶 **Flexible Architecture** - Lightweight website developed with Flask.
 
 ## 🛠️ Technologies Used
 - **Frontend:** HTML, CSS, JavaScript
 - **Backend:** Python (Flask)
 - **Database:** FlaskSQL
-- **Authentication:** GitHub PAT Integration 
+- **Authentication:** GitHub PAT Integration
+- **APIs:** OpenWeatherMap, Twilio, Gmail, Slack
 - **Deployment:** TBD
 
 ## 🧠 Available AI Models 
-- **GPT-40:** OpenAI one of the most advanced multimodal AI with superior text and code generation capabilities.💡
+- **Articuno.AI:** Your friendly weather assistant that keeps you informed, safe, and one step ahead. 🌦️
+
+- **GPT-40:** OpenAI one of the most advanced multimodal AI with superior text and code generation capabilities. 💡
   
 - **DeepSeek:** An open-weight AI model optimized for reasoning and coding tasks. 🐳
   
-- **Gemini 2.0 Flash:** A lightweight, fast-response LLM developed by Google.⚡
+- **Gemini 2.0 Flash:** A lightweight, fast-response LLM developed by Google. ⚡
   
-- **Articuno.AI:** A friendly chatAssistant for instant answer to your daily queries. 🚀
+- **Recipe Queen:** Your culinary assistant for recipes, cooking tips, and meal planning. 🍳
 
 - **Spoiler Alert:** More interactive AI models are coming soon! ☢️
 
@@ -49,9 +58,18 @@ cd Articuno.AI
 pip install -r requirements.txt
 ```
    
-4. Run `python app.py`
+4. Configure API Keys
+   - Create a `.env` file with the following keys:
+   ```
+   OPENWEATHER_API_KEY=your_openweather_api_key
+   GEMINI_API_KEY=your_gemini_api_key
+   TWILIO_ACCOUNT_SID=your_twilio_sid
+   TWILIO_AUTH_TOKEN=your_twilio_token
+   ```
 
-5. Open your web browser and go to `http://127.0.0.1:5000/` to interact with AI models.
+5. Run `python app.py`
+
+6. Open your web browser and go to `http://127.0.0.1:5000/` to interact with AI models.
 
 ## ☎️ Contact
 For any queries or feedback, feel free to reach me at `codesnippets45@gmail.com`. 
