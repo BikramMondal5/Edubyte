@@ -1,7 +1,7 @@
 ## 🤖🪄 Articuno.AI v1.0 - "Interact. Innovate. Inspire with AI"
 
 ![Articuno.AI Landing Page](./static/icons/Landing-page.png)
-Articuno.AI is an intelligent weather agent that provides real-time weather updates, daily forecasts, and emergency alerts — all powered by the OpenWeatherMap API. It integrates seamlessly with Gmail and Slack to deliver weather reports exactly when and where you need them. Beyond weather, users can also interact with different generative AI including advanced LLMs GPT-40, DeepSeek, Gemini 2.0 Flash, Mistral AI and many more.
+Articuno V1.0 is an AI powered platform where user can interact with different generative AI including advanced LLMs GPT-40, DeepSeek, Gemini 2.0 Flash, Mistral AI and many more.
 
 ## 🌟 Features 
 - 🌦️ **Intelligent Weather Agent** - Get real-time weather updates, forecasts, and emergency alerts powered by OpenWeatherMap API.
