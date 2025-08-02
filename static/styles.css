@@ -1634,3 +1634,72 @@ body {
     animation: sending 1s infinite;
     pointer-events: none;
 }
+
+/* Platform Connection Status Styles */
+.platforms-section {
+    margin-top: 16px;
+    padding: 8px 16px;
+    border-top: 1px solid #2D2D2D;
+}
+
+.platforms-header {
+    padding: 8px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: #666;
+    font-size: 14px;
+}
+
+.platform-items {
+    padding: 8px 0;
+}
+
+.platform-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 0;
+    font-size: 14px;
+    color: #CCC;
+}
+
+.platform-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.platform-icon {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: #3D3D3D;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.platform-icon i {
+    font-size: 14px;
+}
+
+.platform-status {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    color: #10b981; /* Green color for connected status */
+    font-size: 12px;
+}
+
+.platform-status i {
+    font-size: 10px;
+}
+
+.status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: #10b981; /* Green color for connected */
+    margin-right: 4px;
+}
